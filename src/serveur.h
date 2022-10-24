@@ -15,10 +15,16 @@
 
 #define PORT 8089
 
+struct Calc {
+ char operator;
+ float nums[2];
+}Calc;
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
  */
 int recois_envoie_message(int socketfd);
+float calculator(char* data);
+int calcul(int client_socket_fd, char* data);
 
 #endif
