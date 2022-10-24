@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "serveur.h"
 
@@ -80,20 +81,10 @@ int renvoie_message(int client_socket_fd, char *data)
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
  */
-int recois_envoie_message(int socketfd)
+int recois_envoie_message(int client_socket_fd)
 {
-  struct sockaddr_in client_addr;
-  char data[1024];
 
-  unsigned int client_addr_len = sizeof(client_addr);
-
-  // nouvelle connection de client
-  int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
-  if (client_socket_fd < 0)
-  {
-    perror("accept");
-    return (EXIT_FAILURE);
-  }
+    char data[1024];
 
   // la réinitialisation de l'ensemble des données
   memset(data, 0, sizeof(data));
@@ -116,18 +107,63 @@ int recois_envoie_message(int socketfd)
   sscanf(data, "%s", code);
 
   // Si le message commence par le mot: 'message:'
-  if (strcmp(code, "message:") == 0)
-  {
-    renvoie_message(client_socket_fd, data);
-  }
-  else
-  {
-    plot(data);
+  if (strcmp(code, "message:") == 0) {
+      renvoie_message(client_socket_fd, data);
+  } else {
+      plot(data);
   }
 
   // fermer le socket
-  close(socketfd);
+  //close(socketfd);
   return (EXIT_SUCCESS);
+}
+
+int renvoie_nom_client(int client_socket_fd){
+
+    char data[1024];
+
+    // la réinitialisation de l'ensemble des données
+    memset(data, 0, sizeof(data));
+
+    // lecture de données envoyées par un client
+    int data_size = read(client_socket_fd, (void *)data, sizeof(data));
+
+    if (data_size < 0)
+    {
+        perror("erreur lecture");
+        return (EXIT_FAILURE);
+    }
+
+    /*
+     * extraire le code des données envoyées par le client.
+     * Les données envoyées par le client peuvent commencer par le mot "message :" ou un autre mot.
+     */
+    printf(data);
+    char code[10];
+    sscanf(data, "%s", code);
+
+    // Si le message commence par le mot: 'message:'
+    if (strcmp(code, "name:") == 0) {
+        renvoie_message(client_socket_fd, data);
+    } else {
+        plot(data);
+    }
+
+    // fermer le socket
+    //close(socketfd);
+    return (EXIT_SUCCESS);
+}
+
+int renvoie_name(int client_socket_fd, char *data)
+{
+    int data_size = write(client_socket_fd, (void *)data, strlen(data));
+
+    if (data_size < 0)
+    {
+        perror("erreur ecriture");
+        return (EXIT_FAILURE);
+    }
+    return (EXIT_SUCCESS);
 }
 
 int main()
@@ -165,11 +201,21 @@ int main()
     return (EXIT_FAILURE);
   }
 
+
+
   // Écouter les messages envoyés par le client
-  listen(socketfd, 10);
+    listen(socketfd, 10);
+    struct sockaddr_in client_addr;
+    char data[1024];
+
+    unsigned int client_addr_len = sizeof(client_addr);
+
+    // nouvelle connection de client
+    int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
 
   // Lire et répondre au client
-  recois_envoie_message(socketfd);
+  recois_envoie_message(client_socket_fd);
+  renvoie_nom_client(client_socket_fd);
 
   return 0;
 }
