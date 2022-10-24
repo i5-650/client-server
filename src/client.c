@@ -63,6 +63,42 @@ int envoie_recois_message(int socketfd)
   return 0;
 }
 
+int envoie_recois_name(int socketfd) {
+
+    char data[1024];
+    // la réinitialisation de l'ensemble des données
+    memset(data, 0, sizeof(data));
+
+    // Demandez à l'utilisateur d'entrer un message
+    char message[1024];
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+
+    strcpy(data, "name: ");
+    strcat(data, hostname);
+
+    int write_status = write(socketfd, data, strlen(data));
+    if (write_status < 0) {
+        perror("erreur ecriture");
+        exit(EXIT_FAILURE);
+    }
+
+    // la réinitialisation de l'ensemble des données
+    memset(data, 0, sizeof(data));
+
+    // lire les données de la socket
+    int read_status = read(socketfd, data, sizeof(data));
+    if (read_status < 0) {
+        perror("erreur lecture");
+        return -1;
+    }
+
+    printf("Nom recu: %s\n", data);
+
+    return 0;
+}
+
 void analyse(char *pathname, char *data)
 {
   // compte de couleurs
@@ -117,11 +153,11 @@ int main(int argc, char **argv)
 
   struct sockaddr_in server_addr;
 
-  if (argc < 2)
+  /*if (argc < 2)
   {
     printf("usage: ./client chemin_bmp_image\n");
     return (EXIT_FAILURE);
-  }
+  }*/
 
   /*
    * Creation d'une socket
@@ -149,7 +185,11 @@ int main(int argc, char **argv)
   if (argc != 2)
   {
     // envoyer et recevoir un message
-    envoie_recois_message(socketfd);
+    envoie_recois_name(socketfd);
+    while(1){
+        envoie_recois_message(socketfd);
+    }
+
   }
   else
   {
