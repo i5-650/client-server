@@ -185,8 +185,11 @@ int main(int argc, char **argv)
   if (argc != 2)
   {
     // envoyer et recevoir un message
-    envoie_recois_message(socketfd);
     envoie_recois_name(socketfd);
+    while(1){
+        envoie_recois_message(socketfd);
+    }
+
   }
   else
   {
