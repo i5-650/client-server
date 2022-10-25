@@ -10,15 +10,6 @@
  * de traiter ces messages et de répondre aux clients.
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <pthread.h>
 
 #include "serveur.h"
 
@@ -100,22 +91,51 @@ int recois_envoie_message(int client_socket_fd)
    * extraire le code des données envoyées par le client.
    * Les données envoyées par le client peuvent commencer par le mot "message :" ou un autre mot.
    */
-  printf("Message recu: %s\n", data);
+  printf("Données recus: %s\n", data);
   char code[10];
   sscanf(data, "%s", code);
+  //memset(data, 0, sizeof(data));
+  
 
   // Si le message commence par le mot: 'message:'
   if (strcmp(code, "message:") == 0) {
       renvoie_message(client_socket_fd, data);
   } else if(strcmp(code , "name:") == 0) {
       renvoie_message(client_socket_fd, data);
+  } else if(strcmp(code, "couleurs:") == 0) {
+      recois_couleurs(client_socket_fd,data);
   } else {
-      plot(data);
+      //plot(data);
   }
 
   // fermer le socket
   //close(socketfd);
   return (EXIT_SUCCESS);
+}
+
+int recois_couleurs(int client_socket_fd,char* data)
+{
+    FILE *fptr;
+
+    fptr = fopen(FILE_COLORS,"a");
+
+    if(fptr == NULL)
+    {
+        printf("Error");
+        exit(1);
+    }
+
+    fprintf(fptr,"%s",data);
+    fclose(fptr);
+
+    int data_size = write(client_socket_fd, (void *)data, strlen(data));
+
+    if (data_size < 0)
+    {
+        perror("erreur ecriture");
+        return (EXIT_FAILURE);
+    }
+    return (EXIT_SUCCESS);
 }
 
 int main()
@@ -158,7 +178,6 @@ int main()
   // Écouter les messages envoyés par le client
     listen(socketfd, 10);
     struct sockaddr_in client_addr;
-    char data[1024];
 
     unsigned int client_addr_len = sizeof(client_addr);
 
