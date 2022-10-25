@@ -16,6 +16,10 @@
 
 #define PORT 8089
 
+struct Calc {
+ char operator;
+ float nums[2];
+}Calc;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,5 +35,7 @@
  * en retour
  */
 int recois_envoie_message(int socketfd);
+float calculator(char* data);
+int calcul(int client_socket_fd, char* data);
 
 #endif

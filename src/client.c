@@ -37,7 +37,6 @@ int envoie_recois_message(int socketfd)
   char message[1024];
   printf("Votre message (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
-  strcpy(data, "message: ");
   strcat(data, message);
 
   int write_status = write(socketfd, data, strlen(data));

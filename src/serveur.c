@@ -106,12 +106,58 @@ int recois_envoie_message(int client_socket_fd)
       recois_couleurs(client_socket_fd,data);
   } else {
       //plot(data);
+    calcul(client_socket_fd, data);
   }
 
   // fermer le socket
   //close(socketfd);
   return (EXIT_SUCCESS);
 }
+
+int calcul(int client_socket_fd, char* data){
+  float result = calculator(data);
+  if(sprintf(data, "%f", result) == EOF){
+    perror("error parsing data");
+    return (EXIT_FAILURE);
+  }
+
+  if(write(client_socket_fd, (void*)data, strlen(data)) < 0){
+    perror("error sending datas");
+    return EXIT_FAILURE;
+  }
+
+  return (EXIT_SUCCESS);
+
+}
+
+float calculator(char* data){
+    if(data[0] != '+' && data[0] != '-' && data[0] != '*' && data[0] != '%' && data[0] != '/'){
+        return 0.0;
+    }
+    float result = 0.0;
+    struct Calc c;
+    c.operator = data[0];
+    if(sscanf(&data[1], "%f %f", &c.nums[0], &c.nums[1]) < 2){
+      perror("Wrong input");
+      return EXIT_FAILURE;
+    }
+
+    if(c.operator == '+'){
+      result = c.nums[0] + c.nums[1];
+    }
+    else if(c.operator == '-'){
+      result = c.nums[0] - c.nums[1];
+    }
+    else if(c.operator == '*'){
+      result = c.nums[0] * c.nums[1];
+    }
+    else if(c.operator == '/'){
+      result = c.nums[0] / c.nums[1];
+    }
+    else {
+      return 0.0;
+    }
+    return result;
 
 int recois_couleurs(int client_socket_fd,char* data)
 {
@@ -136,6 +182,7 @@ int recois_couleurs(int client_socket_fd,char* data)
         return (EXIT_FAILURE);
     }
     return (EXIT_SUCCESS);
+
 }
 
 int main()
