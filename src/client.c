@@ -240,7 +240,6 @@ int main(int argc, char **argv)
     envoie_recois_name(socketfd);
     while(1){
       command_Builder(socketfd);
-        //envoie_recois_message(socketfd);
     }
   }
   else
