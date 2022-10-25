@@ -62,6 +62,41 @@ int envoie_recois_message(int socketfd)
   return 0;
 }
 
+int envoie_recois_name(int socketfd) {
+
+    char data[1024];
+    // la réinitialisation de l'ensemble des données
+    memset(data, 0, sizeof(data));
+
+    // Demandez à l'utilisateur d'entrer un message
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+
+    strcpy(data, "name: ");
+    strcat(data, hostname);
+
+    int write_status = write(socketfd, data, strlen(data));
+    if (write_status < 0) {
+        perror("erreur ecriture");
+        exit(EXIT_FAILURE);
+    }
+
+    // la réinitialisation de l'ensemble des données
+    memset(data, 0, sizeof(data));
+
+    // lire les données de la socket
+    int read_status = read(socketfd, data, sizeof(data));
+    if (read_status < 0) {
+        perror("erreur lecture");
+        return -1;
+    }
+
+    printf("Nom recu: %s\n", data);
+
+    return 0;
+}
+
 void analyse(char *pathname, char *data)
 {
   // compte de couleurs
@@ -110,18 +145,71 @@ int envoie_couleurs(int socketfd, char *pathname)
   return 0;
 }
 
+int envoie_couleurs_table(int socketfd)
+{
+  char color[1024];
+  char data[1024];
+  fgets(color,sizeof(color),stdin);
+  strcpy(data,"couleurs: ");
+  strcat(data,color);
+  printf("%s",data);
+
+  int write_status = write(socketfd, data, strlen(data));
+  if (write_status < 0)
+  {
+    perror("erreur ecriture");
+    exit(EXIT_FAILURE);
+  }
+
+  return 0;
+}
+
+
+int command_Builder(int socketfd){
+  char command[10];
+
+  printf("Veuiller choisir une fonction à exécuter (HELP pour plus d'informations !):");
+  fgets(command, sizeof(command), stdin);
+
+  if(strcmp(command,"HELP\n") == 0)
+  {
+    printf("Voici la liste de toutes les commandes: \nMESSAGE: Permet d'envoyer un message au serveur avec une réponse de sa part !\nCALCUL : Permet d'envoyer un calcul au serveur avec le résultat en retour !\nCOULEUR : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n");
+    return 0;
+  }
+  else if(strcmp(command, "MESSAGE\n") == 0)
+  {
+    printf("Mode message activé : \n");
+    envoie_recois_message(socketfd);
+    return 0;
+  }
+  else if(strcmp(command,"CALCUL\n") == 0)
+  {
+    printf("Mode calcul activé : \n");
+    return 0;
+  }
+  else if(strcmp(command,"COULEUR\n") == 0)
+  {
+    printf("Mode couleurs activé : ");
+    envoie_couleurs_table(socketfd);
+    return 0;
+  }
+  else {
+    return 0;
+  }
+}
+
 int main(int argc, char **argv)
 {
   int socketfd;
 
   struct sockaddr_in server_addr;
-/*
-  if (argc < 2)
+
+  /*if (argc < 2)
   {
     printf("usage: ./client chemin_bmp_image\n");
     return (EXIT_FAILURE);
-  }
-*/
+  }*/
+
   /*
    * Creation d'une socket
    */
@@ -148,7 +236,10 @@ int main(int argc, char **argv)
   if (argc != 2)
   {
     // envoyer et recevoir un message
-    envoie_recois_message(socketfd);
+    envoie_recois_name(socketfd);
+    while(1){
+      command_Builder(socketfd);
+    }
   }
   else
   {
