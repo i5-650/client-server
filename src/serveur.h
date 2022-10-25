@@ -15,10 +15,14 @@
 
 #define PORT 8089
 
+#define NOT_MY_GOAL -1337
+#define TAGS_DATABASE "tags_database.txt"
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
  */
 int recois_envoie_message(int socketfd);
+int recois_balises(int socketfd, char* data);
+int save_tags(char* tags, int start_index);
 
 #endif

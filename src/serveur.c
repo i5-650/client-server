@@ -19,7 +19,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-
 #include "serveur.h"
 
 void plot(char *data)
@@ -109,6 +108,8 @@ int recois_envoie_message(int client_socket_fd)
       renvoie_message(client_socket_fd, data);
   } else if(strcmp(code , "name:") == 0) {
       renvoie_message(client_socket_fd, data);
+  } else if(strcmp(code, "balises: ")){
+      recois_balises(client_socket_fd, data);
   } else {
       plot(data);
   }
@@ -116,6 +117,55 @@ int recois_envoie_message(int client_socket_fd)
   // fermer le socket
   //close(socketfd);
   return (EXIT_SUCCESS);
+}
+
+int recois_balises(int socketfd, char* data){
+  char buff[9] = "empty";
+  if(sscanf(buff, "%s", data)< 1){
+    perror("Invalid input");
+    return EXIT_FAILURE;
+  }
+
+  if(strcmp(buff, "balises: ") < 0){
+    perror("Wrong usage !");
+    return NOT_MY_GOAL;
+  }
+
+  int iterations = 0;
+  if(sscanf(&data[9], "%d", &iterations) < 1 || iterations > 30){
+    perror("Invalid number of balises");
+    return EXIT_FAILURE;
+  }
+
+  unsigned short start_index = 9 + 1;
+  if(iterations > 10){
+    start_index++;
+  }
+
+  if(save_tags(data, start_index)){
+    perror("Error saving tags");
+    return EXIT_FAILURE;
+  }
+  if(renvoie_message(socketfd, "good")){
+    perror("Error responding to client");
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
+}
+
+int save_tags(char* tags, int start_index){
+  FILE* fd = fopen(TAGS_DATABASE, "a");
+  if(fd == NULL){
+    perror("Error opening the file");
+    return EXIT_FAILURE;
+  }
+  if(fprintf(fd, "%s\n", &tags[start_index + 1]) < 0){
+    perror("Error writing tags");
+    return EXIT_FAILURE;
+  }
+
+  fclose(fd);
+  return EXIT_SUCCESS;
 }
 
 int main()
@@ -158,7 +208,7 @@ int main()
   // Écouter les messages envoyés par le client
     listen(socketfd, 10);
     struct sockaddr_in client_addr;
-    char data[1024];
+    //char data[1024];
 
     unsigned int client_addr_len = sizeof(client_addr);
 
