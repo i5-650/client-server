@@ -16,6 +16,9 @@
 
 #define PORT 8089
 
+#define NOT_MY_GOAL -1337
+#define TAGS_DATABASE "tags_database.txt"
+=======
 struct Calc {
  char operator;
  float nums[2];
@@ -35,6 +38,8 @@ struct Calc {
  * en retour
  */
 int recois_envoie_message(int socketfd);
+int recois_balises(int socketfd, char* data);
+int save_tags(char* tags, int start_index);
 float calculator(char* data);
 int calcul(int client_socket_fd, char* data);
 

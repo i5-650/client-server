@@ -37,7 +37,8 @@ int envoie_recois_message(int socketfd)
   char message[1024];
   printf("Votre message (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
-  strcat(data, message);
+  //strcpy(data, "message: ");
+  strcpy(data, message);
 
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0)
@@ -145,6 +146,39 @@ int envoie_couleurs(int socketfd, char *pathname)
   return 0;
 }
 
+int envoie_balise(char* data, int socketfd){
+  char buff[9];
+  if(sscanf(data, "%s", buff)< 1){
+    perror("Invalid input");
+    return EXIT_FAILURE;
+  }
+
+  if(strcmp(buff, "balises: ")){
+    perror("Wrong usage !");
+    return NOT_MY_GOAL;
+  }
+
+  if(write(socketfd, (void*) data, strlen(data)) < 0){
+    perror("Error sending message");
+    return EXIT_FAILURE;
+  }
+
+  memset(data, 0, sizeof(data));
+
+  if(read(socketfd, data, sizeof(data)) < 0){
+    perror("Error receiving message");
+    return EXIT_FAILURE;
+  }
+
+  if(!strcmp(data, "good")){
+    perror("An error occured on the server");
+    return EXIT_FAILURE;
+  }
+
+  printf("Messages received and saved\n");
+  return EXIT_SUCCESS;
+}
+ 
 int envoie_couleurs_table(int socketfd)
 {
   char color[1024];
@@ -204,15 +238,6 @@ int main(int argc, char **argv)
 
   struct sockaddr_in server_addr;
 
-  /*if (argc < 2)
-  {
-    printf("usage: ./client chemin_bmp_image\n");
-    return (EXIT_FAILURE);
-  }*/
-
-  /*
-   * Creation d'une socket
-   */
   socketfd = socket(AF_INET, SOCK_STREAM, 0);
   if (socketfd < 0)
   {
