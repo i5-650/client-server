@@ -12,11 +12,27 @@
 
 #ifndef __SERVER_H__
 #define __SERVER_H__
+#define FILE_COLORS "colors.txt"
 
 #define PORT 8089
 
 #define NOT_MY_GOAL -1337
 #define TAGS_DATABASE "tags_database.txt"
+=======
+struct Calc {
+ char operator;
+ float nums[2];
+}Calc;
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
@@ -24,5 +40,7 @@
 int recois_envoie_message(int socketfd);
 int recois_balises(int socketfd, char* data);
 int save_tags(char* tags, int start_index);
+float calculator(char* data);
+int calcul(int client_socket_fd, char* data);
 
 #endif

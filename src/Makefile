@@ -5,7 +5,7 @@ COBJS ?= client.o bmp.o couleur.o
 SOBJS ?= serveur.o 
 
 # Avertissements
-CFLAGS ?= -Wall -Wextra -lpthread -pthread
+CFLAGS ?= -Wall -Wextra
 
 # Déboggage
 DEBUG ?= -ggdb3
