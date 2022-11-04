@@ -21,8 +21,7 @@
 
 // Structure de données d'une image bmp (en-tête)
 #pragma pack(push, 1)
-typedef struct
-{
+typedef struct{
   uint16_t type;
   uint32_t file_size;
   uint16_t reserved1;
@@ -33,8 +32,7 @@ typedef struct
 
 // Structure de données d'une image bmp (en-tête): détails (taille etc.)
 #pragma pack(push, 1)
-typedef struct
-{
+typedef struct{
   uint32_t info_header_size;
   uint32_t largeur;
   uint32_t hauteur;

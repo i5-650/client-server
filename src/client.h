@@ -12,6 +12,8 @@
 
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
+#include "bmp.h"
+#include "common.h"
 
 /*
  * port d'ordinateur pour envoyer et recevoir des messages
@@ -24,6 +26,12 @@
  * Il faut un argument : l'identifiant de la socket
  */
 int envoie_recois_message(int socketfd);
-int envoie_balise(char* data, int socketfd);
+int envoie_balise(int socketfd);
+int command_builder(int socketfd);
+int envoie_recois_calcul(int socketfd);
+int envoie_recois_name(int socketfd);
+void analyse(char *pathname, char *data);
+int envoie_couleurs(int socketfd, char *pathname);
+int envoie_couleurs_table(int socketfd);
 
 #endif

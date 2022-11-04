@@ -1,8 +1,8 @@
 CC ?= gcc
 
 # Modifiez les deux lignes suivantes et ajoutez de nouveaux fichiers selon vos besoins
-COBJS ?= client.o bmp.o couleur.o
-SOBJS ?= serveur.o 
+CLIENT_OBJS ?= client.o bmp.o couleur.o
+SERVER_OBJS ?= serveur.o operations.o
 
 # Avertissements
 CFLAGS ?= -Wall -Wextra
@@ -18,12 +18,12 @@ CLIENT = client
 all: $(SERVER) $(CLIENT)
 
 # Création d'un exécutable pour le côté serveur
-$(SERVER): $(SOBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER) $(SOBJS)
+$(SERVER): $(SERVER_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER) $(SERVER_OBJS)
 
 # Création d'un exécutable pour le côté client
-$(CLIENT): $(COBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT) $(COBJS)
+$(CLIENT): $(CLIENT_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT) $(CLIENT_OBJS)
 
 # Compilation du code sans création d'un exécutable
 .c.o: 
