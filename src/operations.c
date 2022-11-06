@@ -21,23 +21,23 @@ float calculator(char *data){
     return 0.0;
   }
   float result = 0.0;
-  Calc c;
-  c.operator= data[0];
+  struct Calc c;
+  c.operation= data[0];
   if (sscanf(&data[1], "%f %f", &c.nums[0], &c.nums[1]) < 2){
     perror("Wrong input");
     return EXIT_FAILURE;
   }
 
-  if (c.operator== '+'){
+  if (c.operation== '+'){
     result = c.nums[0] + c.nums[1];
   }
-  else if (c.operator== '-'){
+  else if (c.operation== '-'){
     result = c.nums[0] - c.nums[1];
   }
-  else if (c.operator== '*'){
+  else if (c.operation== '*'){
     result = c.nums[0] * c.nums[1];
   }
-  else if (c.operator== '/'){
+  else if (c.operation== '/'){
     result = c.nums[0] / c.nums[1];
   }
   else{

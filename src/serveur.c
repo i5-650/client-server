@@ -12,6 +12,7 @@
 
 #include "serveur.h"
 #include "operations.h"
+#include <stdio.h>
 
 int main(){
   int socketfd;
@@ -24,6 +25,7 @@ int main(){
     perror("Unable to open a socket");
     return -1;
   }
+  printf("[+] Socket created\n");
 
   int option = 1;
   setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
@@ -40,6 +42,7 @@ int main(){
     perror("bind");
     return (EXIT_FAILURE);
   }
+  printf("[+] Socket binded\n");
 
   // Écouter les messages envoyés par le client
   listen(socketfd, 10);
@@ -49,8 +52,12 @@ int main(){
 
   // nouvelle connection de client
   int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
+  printf("[+] New client connected !\n");
+  
+  if(recois_envoie_message(client_socket_fd) < 0){
+    perror("Error during first connection: ");
+  }
 
-  // Lire et répondre au client
   while (1){
     recois_envoie_message(client_socket_fd);
   }
@@ -126,7 +133,7 @@ int recois_envoie_message(int client_socket_fd){
 
   if (data_size < 0){
     perror("erreur lecture");
-    return (EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
   /*
@@ -136,29 +143,34 @@ int recois_envoie_message(int client_socket_fd){
   printf("Données recus: %s\n", data);
   char code[10];
   sscanf(data, "%s", code);
-  // memset(data, 0, sizeof(data));
 
-  // Si le message commence par le mot: 'message:'
-  if(strncmp(code, HEADER_MESSAGE, strlen(HEADER_MESSAGE)) == 0){
+  if(!strncmp(code, HEADER_MESSAGE, strlen(HEADER_MESSAGE) - 1)){
+    printf("Message case\n");
     renvoie_message(client_socket_fd, data);
   }
-  else if(strncmp(code, HEADER_NAME, strlen(HEADER_NAME)) == 0){
+  else if(!strncmp(code, HEADER_NAME, strlen(HEADER_NAME) - 1)){
+    printf("Name case\n");
     renvoie_message(client_socket_fd, data);
   }
-  else if(strncmp(code, HEADER_TAGS, strlen(HEADER_TAGS))){
+  else if(!strncmp(code, HEADER_TAGS, strlen(HEADER_TAGS) - 1)){
+    printf("Tags case\n");
     recois_balises(client_socket_fd, data);
   }
-  else if(strncmp(code, HEADER_COLOR, strlen(HEADER_COLOR)) == 0){
+  else if(!strncmp(code, HEADER_COLOR, strlen(HEADER_COLOR) - 1)){
+    printf("Color case\n");
     recois_couleurs(client_socket_fd, data);
   }
-  else if(strncmp(code, HEADER_CALCUL, strlen(HEADER_CALCUL))){
-    // plot(data);
+  else if(!strncmp(code, HEADER_CALCUL, strlen(HEADER_CALCUL) - 1)){
+    printf("Calcul case\n");
     calcul(client_socket_fd, data);
+  }
+  else {
+    printf("Couldn't satisfy command\n");
   }
 
   // fermer le socket
   // close(socketfd);
-  return (EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
 
 int recois_couleurs(int client_socket_fd, char *data){

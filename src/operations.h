@@ -13,8 +13,8 @@
 #ifndef __OPERATIONS_H__
 #define __OPERATIONS_H__
 
-typedef struct Calc {
- char operator;
+struct Calc {
+ char operation;
  float nums[2];
 };
 
