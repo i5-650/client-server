@@ -15,15 +15,21 @@
 #include <unistd.h>
 
 #include "operations.h"
+#include "common.h"
 
 float calculator(char *data){
-  if (data[0] != '+' && data[0] != '-' && data[0] != '*' && data[0] != '/'){
+  printf("%s\n", data);
+  unsigned int starting_index = strlen(HEADER_CALCUL);
+  if (data[starting_index] != '+' 
+    && data[starting_index] != '-' 
+    && data[starting_index] != '*' 
+    && data[starting_index] != '/'){
     return 0.0;
   }
   float result = 0.0;
   struct Calc c;
-  c.operation= data[0];
-  if (sscanf(&data[1], "%f %f", &c.nums[0], &c.nums[1]) < 2){
+  c.operation= data[starting_index];
+  if (sscanf(&data[starting_index + 1], "%f %f", &c.nums[0], &c.nums[1]) < 2){
     perror("Wrong input");
     return EXIT_FAILURE;
   }
