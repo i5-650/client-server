@@ -13,6 +13,7 @@
 #include "serveur.h"
 #include "operations.h"
 #include <stdio.h>
+#include <string.h>
 
 int main(){
   int socketfd;
@@ -197,30 +198,19 @@ int recois_couleurs(int client_socket_fd, char *data){
 }
 
 int recois_balises(int socketfd, char *data){
-  char buff[9] = "empty";
-
-  if (sscanf(buff, "%s", data) < 1){
-    perror("Invalid input");
-    return EXIT_FAILURE;
-  }
-
-  if (strcmp(buff, "balises: ") < 0){
-    perror("Wrong usage !");
-    return NOT_MY_GOAL;
-  }
-
+  unsigned int starting_index = strlen(HEADER_TAGS);
   int iterations = 0;
-  if (sscanf(&data[9], "%d", &iterations) < 1 || iterations > 30){
+  if (sscanf(&data[starting_index], "%d", &iterations) < 1 || iterations > 30){
     perror("Invalid number of balises");
     return EXIT_FAILURE;
   }
 
-  unsigned short start_index = 9 + 1;
+  ++starting_index;
   if (iterations > 10){
-    start_index++;
+    ++starting_index;
   }
 
-  if (save_tags(data, start_index)){
+  if (save_tags(data, starting_index)){
     perror("Error saving tags");
     return EXIT_FAILURE;
   }

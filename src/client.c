@@ -225,7 +225,7 @@ int envoie_balise(int socketfd){
     return EXIT_FAILURE;
   }
 
-  if(!strcmp(data, "good")){
+  if(strcmp(data, "good")){
     perror("An error occured on the server");
     return EXIT_FAILURE;
   }
