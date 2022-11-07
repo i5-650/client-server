@@ -1,7 +1,13 @@
 #pragma once
 
-#define HEADER_MESSAGE "msg: "
-#define HEADER_NAME "name: "
-#define HEADER_TAGS "tags: "
-#define HEADER_COLOR "colors: "
-#define HEADER_CALCUL "calculs: "
+#define CODE_MSG "msg"
+#define CODE_NAM "nam"
+#define CODE_TAG "tag"
+#define CODE_COL "col"
+#define CODE_CAL "cal"
+#define CODE_ERR "err"
+
+#define CODE_LEN 3
+
+#define FIRST_JSON_PART "{\"code\":\""
+#define ARRAY_JSON_PART "\",\"values\":["
