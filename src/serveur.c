@@ -12,6 +12,7 @@
 
 #include "serveur.h"
 #include "operations.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -146,24 +147,29 @@ int recois_envoie_message(int client_socket_fd){
   sscanf(data, "%s", code);
 
   if(!strncmp(code, HEADER_MESSAGE, strlen(HEADER_MESSAGE) - 1)){
-    printf("Message case\n");
-    renvoie_message(client_socket_fd, data);
+    if(renvoie_message(client_socket_fd, data)){
+      printf("An error occured while sending a message");
+    }
   }
   else if(!strncmp(code, HEADER_NAME, strlen(HEADER_NAME) - 1)){
-    printf("Name case\n");
-    renvoie_message(client_socket_fd, data);
+    if(renvoie_message(client_socket_fd, data)){
+      printf("An error occured while sending a message");
+    }
   }
   else if(!strncmp(code, HEADER_TAGS, strlen(HEADER_TAGS) - 1)){
-    printf("Tags case\n");
-    recois_balises(client_socket_fd, data);
+    if(recois_balises(client_socket_fd, data)){
+      printf("An error occured while sending a message");
+    }
   }
   else if(!strncmp(code, HEADER_COLOR, strlen(HEADER_COLOR) - 1)){
-    printf("Color case\n");
-    recois_couleurs(client_socket_fd, data);
+    if(recois_couleurs(client_socket_fd, data)){
+      printf("An error occured while sending a message");
+    }
   }
   else if(!strncmp(code, HEADER_CALCUL, strlen(HEADER_CALCUL) - 1)){
-    printf("Calcul case\n");
-    calcul(client_socket_fd, data);
+    if(calcul(client_socket_fd, data)){
+      printf("An error occured while sending a messages\n");
+    }
   }
   else {
     printf("Couldn't satisfy command\n");
@@ -180,8 +186,11 @@ int recois_couleurs(int client_socket_fd, char *data){
   fptr = fopen(FILE_COLORS, "a");
 
   if (fptr == NULL){
-    printf("Error");
-    exit(1);
+    strcpy(data, "error: couldn't write data in file");
+    if(write(client_socket_fd, (void*)data, strlen(data))){
+      printf("An error occured while sending messages\n");
+    }
+    exit(EXIT_FAILURE);
   }
 
   fprintf(fptr, "%s", data);
@@ -190,7 +199,7 @@ int recois_couleurs(int client_socket_fd, char *data){
   int data_size = write(client_socket_fd, (void *)data, strlen(data));
 
   if (data_size < 0){
-    perror("erreur ecriture");
+    perror("error while writing file");
     return EXIT_FAILURE;
   }
 
@@ -212,9 +221,10 @@ int recois_balises(int socketfd, char *data){
 
   if (save_tags(data, starting_index)){
     perror("Error saving tags");
+    strcpy(data, "error: couldn't save tags in database");
     return EXIT_FAILURE;
   }
-  if (renvoie_message(socketfd, "good")){
+  if(renvoie_message(socketfd, "good")){
     perror("Error responding to client");
     return EXIT_FAILURE;
   }
