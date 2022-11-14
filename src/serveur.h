@@ -35,7 +35,7 @@
  */
 int recois_envoie_message(int socketfd);
 int recois_balises(int socketfd, char* data);
-int save_tags(char* tags, int start_index);
+int save_tags(char* tags);
 void plot(char *data);
 int renvoie_message(int client_socket_fd, char *data);
 int recois_couleurs(int client_socket_fd, char *data);

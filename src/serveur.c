@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "json.h"
+
 int main(){
   int socketfd;
   int bind_status;
@@ -121,6 +123,18 @@ int renvoie_message(int client_socket_fd, char *data){
   return (EXIT_SUCCESS);
 }
 
+int renvoie_name(int client_socket_fd, char *data){
+  printf("%s \n", data);
+  int data_size = write(client_socket_fd, (void *)data, strlen(data));
+
+  if (data_size < 0){
+    perror("erreur ecriture");
+    return (EXIT_FAILURE);
+  }
+
+  return (EXIT_SUCCESS);
+}
+
 /* accepter la nouvelle connection d'un client et lire les données
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
@@ -132,7 +146,6 @@ int recois_envoie_message(int client_socket_fd){
 
   // lecture de données envoyées par un client
   int data_size = read(client_socket_fd, (void *)data, sizeof(data));
-
   if (data_size < 0){
     perror("erreur lecture");
     return EXIT_FAILURE;
@@ -143,30 +156,29 @@ int recois_envoie_message(int client_socket_fd){
    * Les données envoyées par le client peuvent commencer par le mot "message :" ou un autre mot.
    */
   printf("Données recus: %s\n", data);
-  char code[10];
-  sscanf(data, "%s", code);
+  char *code = get_code(data);
 
-  if(!strncmp(code, HEADER_MESSAGE, strlen(HEADER_MESSAGE) - 1)){
+  if(!strncmp(code, CODE_MSG, 3)){
     if(renvoie_message(client_socket_fd, data)){
       printf("An error occured while sending a message");
     }
   }
-  else if(!strncmp(code, HEADER_NAME, strlen(HEADER_NAME) - 1)){
-    if(renvoie_message(client_socket_fd, data)){
+  else if(!strncmp(code, CODE_NAM, 3)){
+    if(renvoie_name(client_socket_fd, data)){
       printf("An error occured while sending a message");
     }
   }
-  else if(!strncmp(code, HEADER_TAGS, strlen(HEADER_TAGS) - 1)){
+  else if(!strncmp(code, CODE_TAG, 3)){
     if(recois_balises(client_socket_fd, data)){
       printf("An error occured while sending a message");
     }
   }
-  else if(!strncmp(code, HEADER_COLOR, strlen(HEADER_COLOR) - 1)){
+  else if(!strncmp(code, CODE_COL, 3)){
     if(recois_couleurs(client_socket_fd, data)){
       printf("An error occured while sending a message");
     }
   }
-  else if(!strncmp(code, HEADER_CALCUL, strlen(HEADER_CALCUL) - 1)){
+  else if(!strncmp(code, CODE_CAL, 3)){
     if(calcul(client_socket_fd, data)){
       printf("An error occured while sending a messages\n");
     }
@@ -175,6 +187,7 @@ int recois_envoie_message(int client_socket_fd){
     printf("Couldn't satisfy command\n");
   }
 
+  free(code);
   // fermer le socket
   // close(socketfd);
   return EXIT_SUCCESS;
@@ -207,19 +220,7 @@ int recois_couleurs(int client_socket_fd, char *data){
 }
 
 int recois_balises(int socketfd, char *data){
-  unsigned int starting_index = strlen(HEADER_TAGS);
-  int iterations = 0;
-  if (sscanf(&data[starting_index], "%d", &iterations) < 1 || iterations > 30){
-    perror("Invalid number of balises");
-    return EXIT_FAILURE;
-  }
-
-  ++starting_index;
-  if (iterations > 10){
-    ++starting_index;
-  }
-
-  if (save_tags(data, starting_index)){
+  if (save_tags(data)){
     perror("Error saving tags");
     strcpy(data, "error: couldn't save tags in database");
     return EXIT_FAILURE;
@@ -231,7 +232,7 @@ int recois_balises(int socketfd, char *data){
   return EXIT_SUCCESS;
 }
 
-int save_tags(char *tags, int start_index){
+int save_tags(char *tags){
   FILE *fd = fopen(TAGS_DATABASE, "a");
   
   if (fd == NULL){
@@ -239,7 +240,7 @@ int save_tags(char *tags, int start_index){
     return EXIT_FAILURE;
   }
 
-  if (fprintf(fd, "%s\n", &tags[start_index + 1]) < 0){
+  if (fprintf(fd, "%s\n", tags) < 0){
     perror("Error writing tags");
     return EXIT_FAILURE;
   }

@@ -1,8 +1,8 @@
 CC ?= gcc
 
 # Modifiez les deux lignes suivantes et ajoutez de nouveaux fichiers selon vos besoins
-CLIENT_OBJS ?= client.o bmp.o couleur.o
-SERVER_OBJS ?= serveur.o operations.o
+CLIENT_OBJS ?= client.o bmp.o couleur.o json.o
+SERVER_OBJS ?= serveur.o operations.o json.o
 
 # Avertissements
 CFLAGS ?= -Wall -Wextra
@@ -19,13 +19,16 @@ all: $(SERVER) $(CLIENT)
 
 # Création d'un exécutable pour le côté serveur
 $(SERVER): $(SERVER_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER) $(SERVER_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER).out $(SERVER_OBJS)
 
 # Création d'un exécutable pour le côté client
 $(CLIENT): $(CLIENT_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT) $(CLIENT_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS)
 
 # Compilation du code sans création d'un exécutable
 .c.o: 
 	$(CC) $(DEBUG) $(CFLAGS) -c $*.c
+
+clean: 
+	rm -rf *.o *.out
 

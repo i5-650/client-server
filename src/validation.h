@@ -11,3 +11,10 @@
  * valides, c'est-à-dire que les messages respectent le format JSON et
  * respectent le protocole spécifié par le côté serveur.
  */
+
+#ifndef __VALIDATION_H__
+#define __VALIDATION_H__
+
+int validate_json(char* data);
+
+#endif // __VALIDATION_H__
