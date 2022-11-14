@@ -15,10 +15,14 @@
  */
 
 int main(int argc, char* argv[]){
-
-    printf("Expected: 10, real: %f\n", calculator("+ 5 5"));
-    printf("Expected: 12.3, real: %f\n", calculator("* 4.1 3"));
-
+    char *str = "[\"machine\",\"bidule\",\"ta_darone_la_pute\"]";
+    char out[3][1024];
+    
+    if(!sscanf(str, "[\"%s\",\"%s\",\"%s\"]", out[0], out[1], out[2])){
+        printf("TA MERE LA PUTE\n");
+        return EXIT_FAILURE;
+    }
+    printf("%s\n%s\n%s\n", out[0], out[1], out[2]);
     return 0;
 }
 

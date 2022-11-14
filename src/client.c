@@ -10,6 +10,7 @@
  * d'envoyer et de recevoir des messages. Ces messages peuvent être du simple texte ou des chiffres.
  */
 
+#include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,7 @@
 
 #include "common.h"
 #include "client.h"
+#include "json.h"
 
 int main(int argc, char **argv){
   int socketfd;
@@ -71,8 +73,14 @@ int envoie_recois_calcul(int socketfd){
   char message[1024];
   printf("Votre calcul (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
-  strcpy(data, HEADER_CALCUL);
-  strcat(data, message);
+
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_CAL);
+  strcat(data, ARRAY_JSON_PART);
+  
+  if(set_calcul(message, data)){
+    return EXIT_FAILURE;
+  }
 
   int write_status = write(socketfd, data, strlen(data));
   if(write_status < 0){
@@ -104,8 +112,14 @@ int envoie_recois_message(int socketfd){
   char message[1024];
   printf("Votre message (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
-  strcpy(data, HEADER_MESSAGE);
-  strcat(data, message);
+
+
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_MSG);
+  strcat(data, ARRAY_JSON_PART);
+  if(set_message(message, data)){
+    return EXIT_FAILURE;
+  }
 
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0){
@@ -138,8 +152,13 @@ int envoie_recois_name(int socketfd){
   hostname[1023] = '\0';
   gethostname(hostname, 1023);
 
-  strcpy(data, HEADER_NAME);
-  strcat(data, hostname);
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_NAM);
+  strcat(data, ARRAY_JSON_PART);
+
+  if(set_message(hostname, data)){
+    return EXIT_FAILURE;
+  }
 
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0){
@@ -167,7 +186,7 @@ void analyse(char *pathname, char *data){
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  strcpy(data, HEADER_COLOR);
+  strcpy(data, CODE_COL);
   char temp_string[10] = "10,";
   if (cc->size < 10){
     sprintf(temp_string, "%d,", cc->size);
@@ -207,11 +226,47 @@ int envoie_couleurs(int socketfd, char *pathname){
 
 int envoie_balise(int socketfd){
   char data[1024];
-  char balises[1024];
+  char input[30];
+  int balise_count = 0;
+  
+  printf("How many tags are you sending ? (limited to 30) ");
+  fgets(input, sizeof(input), stdin);
+  printf("input: %s\n", input);
+  if(input[strlen(input) - 1] == '\n'){
+    input[strlen(input) - 1] = '\0';
+  }
 
-  fgets(balises, sizeof(data), stdin);
-  strcpy(data, HEADER_TAGS);
-  strcat(data, balises);
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_TAG);
+  strcat(data, ARRAY_JSON_PART);
+  strcat(data, "\"");
+
+  sscanf(input, "%d", &balise_count);
+  printf("input: %s\n", input);
+  
+  if(balise_count <= 0 || balise_count > 30){
+    return EXIT_FAILURE;
+  }
+  
+  strcat(data, input);
+  strcat(data, "\",\"");
+  memset(input, 0, sizeof(input));
+
+  for(size_t i = 0; i < balise_count; i++){
+    printf("Enter a tag (max len: 30): ");
+    fgets(input, sizeof(input), stdin);
+    if(input[strlen(input) - 1] == '\n'){
+      input[strlen(input) - 1] = '\0';
+    }
+    strcat(data, input);
+    strcat(data, "\"");
+    if(i + 1 != balise_count){
+      strcat(data, ",\"");
+    }
+    memset(input, 0, sizeof(input));
+  }
+
+  strcat(data, "]}");
 
   if(write(socketfd, (void *)data, strlen(data)) < 0){
     perror("Error sending message");
@@ -238,7 +293,7 @@ int envoie_couleurs_table(int socketfd){
   char color[1024];
   char data[1024];
   fgets(color, sizeof(color), stdin);
-  strcpy(data, HEADER_COLOR);
+  strcpy(data, CODE_COL);
   strcat(data, color);
   printf("%s", data);
 
@@ -268,7 +323,9 @@ int command_builder(int socketfd){
   }
   else if (strcmp(command, "CALC\n") == 0){
     printf("Mode calcul activé : \n");
-    envoie_recois_calcul(socketfd);
+    if(envoie_recois_calcul(socketfd)){
+      printf("TOUT CASSÉ\n");
+    }
     return 0;
   }
   else if (strcmp(command, "COLOR\n") == 0){
@@ -277,8 +334,10 @@ int command_builder(int socketfd){
     return 0;
   }
   else if(strcmp(command, "TAGS\n") == 0){
-    printf("Envoie de balise : ");
-    envoie_balise(socketfd);
+    if(envoie_balise(socketfd)){
+      printf("Error occured during tags sending\n");
+      return EXIT_FAILURE;
+    }
     return 0;
   }
 

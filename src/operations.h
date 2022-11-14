@@ -18,7 +18,7 @@ struct Calc {
  float nums[2];
 };
 
-int calculator(char *data, float* output);
+int calculator(struct Calc *c, float* output);
 int calcul(int client_socket_fd, char *data);
 
 #endif
