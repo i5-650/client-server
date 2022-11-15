@@ -18,13 +18,16 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <signal.h>
 
 #include "common.h"
 #include "client.h"
 #include "json.h"
 
+int socketfd;
+
 int main(int argc, char **argv){
-  int socketfd;
+  signal(SIGINT, manage_signal);
 
   struct sockaddr_in server_addr;
 
@@ -60,10 +63,17 @@ int main(int argc, char **argv){
   close(socketfd);
 }
 
-/*
- * Fonction d'envoi et de réception de messages
- * Il faut un argument : l'identifiant de la socket
- */
+void manage_signal(int sig){
+  if(sig == SIGINT){
+    if(write(socketfd, "exit", 4) < 0){
+      perror("write");
+      exit(EXIT_FAILURE);
+    }
+    close(socketfd);
+    exit(EXIT_SUCCESS);
+  }
+}
+
 int envoie_recois_calcul(int socketfd){
   char data[1024];
   // la réinitialisation de l'ensemble des données
