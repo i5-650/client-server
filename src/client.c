@@ -54,7 +54,7 @@ int main(int argc, char **argv){
     }
   }
   else{
-    envoie_couleurs(socketfd, argv[1]);
+    envoie_couleurs(socketfd);
   }
 
   close(socketfd);
@@ -186,7 +186,6 @@ void analyse(char *pathname, char *data){
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  strcpy(data, CODE_COL);
   char temp_string[10] = "10,";
   if (cc->size < 10){
     sprintf(temp_string, "%d,", cc->size);
@@ -209,10 +208,17 @@ void analyse(char *pathname, char *data){
   data[strlen(data) - 1] = '\0';
 }
 
-int envoie_couleurs(int socketfd, char *pathname){
+int envoie_couleurs(int socketfd){
   char data[1024];
+  char pathname[1024];
+
+  printf("Veuillez renseigner le chemin d'accès de votre image:\n");
+  fgets(pathname,sizeof(pathname),stdin);
+  pathname[strlen(pathname)-1] = '\0';
+
   memset(data, 0, sizeof(data));
   analyse(pathname, data);
+  printf("\ndata: %s", data);
 
   int status = write(socketfd, data, strlen(data));
   if (status < 0){
@@ -346,6 +352,10 @@ int command_builder(int socketfd){
       return EXIT_FAILURE;
     }
     return 0;
+  }
+  else if(strcmp(command, "ANLZ\n") == 0){
+    printf("Mode analise activé : ");
+    envoie_couleurs(socketfd);
   }
 
   return 1;

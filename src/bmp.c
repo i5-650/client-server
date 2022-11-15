@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bmp.h"
 
@@ -30,6 +31,8 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier){
   // l'ouverture du fichier pour la lecture
   int fd = open(nom_de_fichier, O_RDONLY);
   printf("%s", nom_de_fichier);
+
+
   if (fd < 0){
     perror("Erreur: open");
     return 0;
@@ -40,6 +43,7 @@ couleur_compteur *analyse_bmp_image(char *nom_de_fichier){
 
   // la lecture de l'en-tête du fichier pour en connaître la taille et le type
   ssize_t compte = read(fd, &bheader, sizeof(bheader));
+
   if (compte < 0){
     perror("Erreur: read");
     return (NULL);

@@ -71,11 +71,10 @@ int main(){
 
 void plot(char *data){
   // Extraire le compteur et les couleurs RGB
-  FILE *p = popen("gnuplot -persist", "w");
+  FILE *p = fopen("gnuplot.txt", "a");
   printf("Plot\n");
   int count = 0;
   int n;
-  char *saveptr = NULL;
   char *str = data;
 
   fprintf(p, "set xrange [-15:15]\n");
@@ -85,29 +84,29 @@ void plot(char *data){
   fprintf(p, "plot '-' with circles lc rgbcolor variable\n");
 
   while (1){
-    char *token = strtok_r(str, ",", &saveptr);
+    char *token = strtok(str, ",");
     
     if (token == NULL){
       break;
     }
 
-    str = NULL;
-    printf("%d: %s\n", count, token);
-
-    if (count == 1){
-      n = atoi(token);
+    if (count == 0){
+      sscanf(token,"%d",&n);
       printf("n = %d\n", n);
     }
     else{
       // Le numéro 36, parceque 360° (cercle) / 10 couleurs = 36
       fprintf(p, "0 0 10 %d %d 0x%s\n", (count - 1) * 36, count * 36, token + 1);
+      printf("%d: %s\n", count, token);
     }
+
+    str = NULL;
     count++;
   }
 
   fprintf(p, "e\n");
   printf("Plot: FIN\n");
-  pclose(p);
+  fclose(p);
 }
 
 /* renvoyer un message (*data) au client (client_socket_fd)
@@ -178,7 +177,8 @@ int recois_envoie_message(int client_socket_fd){
     }
   }
   else {
-    printf("Couldn't satisfy command\n");
+    plot(code);
+    //printf("Couldn't satisfy command\n");
   }
 
   free(code);
