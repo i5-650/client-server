@@ -206,7 +206,6 @@ void analyse(char *pathname, char *data){
     strcat(data, temp_string);
   }
 
-  // enlever le dernier virgule
   data[strlen(data) - 1] = '\0';
 }
 
@@ -215,12 +214,22 @@ int envoie_couleurs(int socketfd, char *pathname){
   memset(data, 0, sizeof(data));
   analyse(pathname, data);
 
-  int write_status = write(socketfd, data, strlen(data));
-  if (write_status < 0){
-    perror("erreur ecriture");
+  int status = write(socketfd, data, strlen(data));
+  if (status < 0){
+    perror("Error writing to socket");
     exit(EXIT_FAILURE);
   }
 
+  status = read(socketfd, data, sizeof(data));
+  if(status < 0){
+    perror("Error receiving server response");
+    return EXIT_FAILURE;
+  }
+
+  if(strncmp(&data[strlen(ARRAY_JSON_PART)], CODE_OKK, 3) == 0){
+    printf("Colors saved\n");
+    return EXIT_SUCCESS;
+  }
   return 0;
 }
 
@@ -231,7 +240,6 @@ int envoie_balise(int socketfd){
   
   printf("How many tags are you sending ? (limited to 30) ");
   fgets(input, sizeof(input), stdin);
-  printf("input: %s\n", input);
   if(input[strlen(input) - 1] == '\n'){
     input[strlen(input) - 1] = '\0';
   }
@@ -242,7 +250,6 @@ int envoie_balise(int socketfd){
   strcat(data, "\"");
 
   sscanf(input, "%d", &balise_count);
-  printf("input: %s\n", input);
   
   if(balise_count <= 0 || balise_count > 30){
     return EXIT_FAILURE;
@@ -280,7 +287,7 @@ int envoie_balise(int socketfd){
     return EXIT_FAILURE;
   }
 
-  if(strcmp(data, "good")){
+  if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
     perror("An error occured on the server");
     return EXIT_FAILURE;
   }

@@ -141,20 +141,14 @@ int renvoie_name(int client_socket_fd, char *data){
  */
 int recois_envoie_message(int client_socket_fd){
   char data[1024];
-  // la réinitialisation de l'ensemble des données
   memset(data, 0, sizeof(data));
 
-  // lecture de données envoyées par un client
   int data_size = read(client_socket_fd, (void *)data, sizeof(data));
   if (data_size < 0){
     perror("erreur lecture");
     return EXIT_FAILURE;
   }
 
-  /*
-   * extraire le code des données envoyées par le client.
-   * Les données envoyées par le client peuvent commencer par le mot "message :" ou un autre mot.
-   */
   printf("Données recus: %s\n", data);
   char *code = get_code(data);
 
@@ -188,8 +182,6 @@ int recois_envoie_message(int client_socket_fd){
   }
 
   free(code);
-  // fermer le socket
-  // close(socketfd);
   return EXIT_SUCCESS;
 }
 
@@ -199,7 +191,11 @@ int recois_couleurs(int client_socket_fd, char *data){
   fptr = fopen(FILE_COLORS, "a");
 
   if (fptr == NULL){
-    strcpy(data, "error: couldn't write data in file");
+    memset(data, 0, sizeof(data));
+    strcpy(data, FIRST_JSON_PART);
+    strcat(data, CODE_ERR);
+    strcat(data, ARRAY_JSON_PART);
+    strcat(data, "\"Err: colors couldn't be saved\"]}");
     if(write(client_socket_fd, (void*)data, strlen(data))){
       printf("An error occured while sending messages\n");
     }
@@ -216,16 +212,30 @@ int recois_couleurs(int client_socket_fd, char *data){
     return EXIT_FAILURE;
   }
 
+  memset(data, 0, sizeof(data));
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_OKK);
+  strcat(data, ARRAY_JSON_PART);
+  strcat(data, "\"Okk: colors saved\"]}");
+
   return EXIT_SUCCESS;
 }
 
 int recois_balises(int socketfd, char *data){
   if (save_tags(data)){
-    perror("Error saving tags");
-    strcpy(data, "error: couldn't save tags in database");
+    perror("Error saving tags");  strcpy(data, FIRST_JSON_PART);
+    strcat(data, CODE_ERR);
+    strcat(data, ARRAY_JSON_PART);
+    strcat(data, "\"Err: tags couldn't be saved\"]}");
     return EXIT_FAILURE;
   }
-  if(renvoie_message(socketfd, "good")){
+
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_OKK);
+  strcat(data, ARRAY_JSON_PART);
+  strcat(data, "\"Okk: tags saved\"]}");
+
+  if(renvoie_message(socketfd, data)){
     perror("Error responding to client");
     return EXIT_FAILURE;
   }

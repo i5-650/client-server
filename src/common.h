@@ -6,6 +6,7 @@
 #define CODE_COL "col"
 #define CODE_CAL "cal"
 #define CODE_ERR "err"
+#define CODE_OKK "okk"
 
 #define CODE_LEN 3
 
