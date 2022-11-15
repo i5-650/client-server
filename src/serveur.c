@@ -75,6 +75,7 @@ void plot(char *data){
   printf("Plot\n");
   int count = 0;
   int n;
+
   char *str = data;
 
   fprintf(p, "set xrange [-15:15]\n");
@@ -82,16 +83,16 @@ void plot(char *data){
   fprintf(p, "set style fill transparent solid 0.9 noborder\n");
   fprintf(p, "set title 'Top 10 colors'\n");
   fprintf(p, "plot '-' with circles lc rgbcolor variable\n");
-
+  unsigned int start_delimiter = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART);
+  memset(&str[strlen(str) - 2], 0, sizeof(char)*2);
   while (1){
-    char *token = strtok(str, ",");
-    
+    char *token = strtok(&str[start_delimiter], ",");
     if (token == NULL){
       break;
     }
 
     if (count == 0){
-      sscanf(token,"%d",&n);
+      sscanf(token,"\"%d\"",&n);
       printf("n = %d\n", n);
     }
     else{
@@ -99,9 +100,8 @@ void plot(char *data){
       fprintf(p, "0 0 10 %d %d 0x%s\n", (count - 1) * 36, count * 36, token + 1);
       printf("%d: %s\n", count, token);
     }
-
-    str = NULL;
     count++;
+    start_delimiter+=strlen(token)+1;
   }
 
   fprintf(p, "e\n");
@@ -184,6 +184,14 @@ int recois_envoie_message(int client_socket_fd){
   else {
     save_tags(data);
     plot(data);
+    memset(data, 0, sizeof(char)*1024);
+    strcpy(data, FIRST_JSON_PART);
+    strcat(data, CODE_OKK);
+    strcat(data, ARRAY_JSON_PART);
+    strcat(data, "\"Colors saved\"]}");
+    if(write(client_socket_fd, (void *)data, strlen(data))){
+      printf("An error occured while sending a message"); 
+    }
     //printf("Couldn't satisfy command\n");
   }
   free(code);
