@@ -186,7 +186,7 @@ void analyse(char *pathname, char *data){
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  char temp_string[10] = "10,";
+  char temp_string[10] = "\"10\",\"";
   if (cc->size < 10){
     sprintf(temp_string, "%d,", cc->size);
   }
@@ -203,9 +203,10 @@ void analyse(char *pathname, char *data){
     }
 
     strcat(data, temp_string);
+    strcat(data, "\",");
   }
-
   data[strlen(data) - 1] = '\0';
+  strcat(data, "]}");
 }
 
 int envoie_couleurs(int socketfd){
@@ -303,19 +304,66 @@ int envoie_balise(int socketfd){
 }
 
 int envoie_couleurs_table(int socketfd){
-  char color[1024];
   char data[1024];
-  fgets(color, sizeof(color), stdin);
-  strcpy(data, CODE_COL);
-  strcat(data, color);
-  printf("%s", data);
-
-  int write_status = write(socketfd, data, strlen(data));
-  if (write_status < 0){
-    perror("erreur ecriture");
-    exit(EXIT_FAILURE);
+  char input[30];
+  int balise_count = 0;
+  
+  printf("How many colors are you sending ? (limited to 30) ");
+  fgets(input, sizeof(input), stdin);
+  if(input[strlen(input) - 1] == '\n'){
+    input[strlen(input) - 1] = '\0';
   }
 
+  strcpy(data, FIRST_JSON_PART);
+  strcat(data, CODE_TAG);
+  strcat(data, ARRAY_JSON_PART);
+  strcat(data, "\"");
+
+  sscanf(input, "%d", &balise_count);
+  
+  if(balise_count <= 0 || balise_count > 30){
+    return EXIT_FAILURE;
+  }
+  
+  strcat(data, input);
+  strcat(data, "\",\"");
+  memset(input, 0, sizeof(input));
+
+  for(size_t i = 0; i < balise_count; i++){
+    printf("Enter a colors (max len: 30): ");
+    fgets(input, sizeof(input), stdin);
+    if(input[strlen(input) - 1] == '\n'){
+      input[strlen(input) - 1] = '\0';
+    }
+    strcat(data, input);
+    strcat(data, "\"");
+    if(i + 1 != balise_count){
+      strcat(data, ",\"");
+    }
+    memset(input, 0, sizeof(input));
+  }
+
+  strcat(data, "]}");
+
+  if(write(socketfd, (void *)data, strlen(data)) < 0){
+    perror("Error sending message");
+    return EXIT_FAILURE;
+  }
+
+  memset(data, 0, sizeof(data));
+
+  if(read(socketfd, data, sizeof(data)) < 0){
+    perror("Error receiving message");
+    return EXIT_FAILURE;
+  }
+
+  if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
+    perror("An error occured on the server");
+    return EXIT_FAILURE;
+  }
+
+  printf("Messages received and saved\n");
+  return EXIT_SUCCESS;
   return 0;
 }
 
