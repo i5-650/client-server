@@ -176,12 +176,16 @@ int recois_envoie_message(int client_socket_fd){
       printf("An error occured while sending a messages\n");
     }
   }
+  else if(strcmp(data, "exit") == 0){
+    printf("Client disconnected\n");
+    close(client_socket_fd);
+    exit(EXIT_SUCCESS);
+  }
   else {
     save_tags(data);
     plot(data);
     //printf("Couldn't satisfy command\n");
   }
-
   free(code);
   return EXIT_SUCCESS;
 }

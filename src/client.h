@@ -25,6 +25,7 @@
  * Fonction d'envoi et de réception de messages
  * Il faut un argument : l'identifiant de la socket
  */
+void manage_signal(int sig);
 int envoie_recois_message(int socketfd);
 int envoie_balise(int socketfd);
 int command_builder(int socketfd);
