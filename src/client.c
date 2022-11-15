@@ -24,6 +24,7 @@
 #include "client.h"
 #include "json.h"
 
+
 int socketfd;
 
 int main(int argc, char **argv){
@@ -57,7 +58,7 @@ int main(int argc, char **argv){
     }
   }
   else{
-    envoie_couleurs(socketfd);
+    envoie_couleurs(socketfd, argv[1]);
   }
 
   close(socketfd);
@@ -77,7 +78,7 @@ void manage_signal(int sig){
 int envoie_recois_calcul(int socketfd){
   char data[1024];
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // Demandez à l'utilisateur d'entrer un message
   char message[1024];
@@ -99,10 +100,10 @@ int envoie_recois_calcul(int socketfd){
   }
 
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(data));
+  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if(read_status < 0){
     perror("erreur lecture");
     return -1;
@@ -116,7 +117,7 @@ int envoie_recois_calcul(int socketfd){
 int envoie_recois_message(int socketfd){
   char data[1024];
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // Demandez à l'utilisateur d'entrer un message
   char message[1024];
@@ -138,10 +139,10 @@ int envoie_recois_message(int socketfd){
   }
 
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(data));
+  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if (read_status < 0){
     perror("erreur lecture");
     return -1;
@@ -155,7 +156,7 @@ int envoie_recois_message(int socketfd){
 int envoie_recois_name(int socketfd){
   char data[1024];
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // Demandez à l'utilisateur d'entrer un message
   char hostname[1024];
@@ -177,10 +178,10 @@ int envoie_recois_name(int socketfd){
   }
 
   // la réinitialisation de l'ensemble des données
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(data));
+  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if (read_status < 0){
     perror("erreur lecture");
     return -1;
@@ -221,15 +222,25 @@ void analyse(char *pathname, char *data){
   strcat(data, "]}");
 }
 
-int envoie_couleurs(int socketfd){
+int envoie_couleurs(int socketfd, char* image_path){
   char data[1024];
   char pathname[1024];
+  
+  if(image_path == NULL){
+    printf("Veuillez entrer le chemin de l'image: ");
+    fgets(image_path, sizeof(char)*DATA_LEN, stdin);
+    image_path[strlen(image_path) - 1] = '\0';
+  }
+  else {
+    strncpy(data, image_path, 1024);
+  }
+
 
   printf("\nVeuillez renseigner le chemin d'accès de votre image:\n");
-  fgets(pathname,sizeof(pathname),stdin);
+  fgets(pathname,sizeof(char)*DATA_LEN,stdin);
   pathname[strlen(pathname)-1] = '\0';
 
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
   analyse(pathname, data);
   printf("\ndata: %s", data);
 
@@ -239,7 +250,7 @@ int envoie_couleurs(int socketfd){
     exit(EXIT_FAILURE);
   }
 
-  status = read(socketfd, data, sizeof(data));
+  status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if(status < 0){
     perror("Error receiving server response");
     return EXIT_FAILURE;
@@ -258,7 +269,7 @@ int envoie_balise(int socketfd){
   int balise_count = 0;
   
   printf("How many tags are you sending ? (limited to 30) ");
-  fgets(input, sizeof(input), stdin);
+  fgets(input, sizeof(char)*30, stdin);
   if(input[strlen(input) - 1] == '\n'){
     input[strlen(input) - 1] = '\0';
   }
@@ -278,9 +289,9 @@ int envoie_balise(int socketfd){
   strcat(data, "\",\"");
   memset(input, 0, sizeof(input));
 
-  for(size_t i = 0; i < balise_count; i++){
+  for(int i = 0; i < balise_count; i++){
     printf("Enter a tag (max len: 30): ");
-    fgets(input, sizeof(input), stdin);
+    fgets(input, sizeof(char)*30, stdin);
     if(input[strlen(input) - 1] == '\n'){
       input[strlen(input) - 1] = '\0';
     }
@@ -289,7 +300,7 @@ int envoie_balise(int socketfd){
     if(i + 1 != balise_count){
       strcat(data, ",\"");
     }
-    memset(input, 0, sizeof(input));
+    memset(input, 0, sizeof(char)*30);
   }
 
   strcat(data, "]}");
@@ -299,9 +310,9 @@ int envoie_balise(int socketfd){
     return EXIT_FAILURE;
   }
 
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
-  if(read(socketfd, data, sizeof(data)) < 0){
+  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
     perror("Error receiving message");
     return EXIT_FAILURE;
   }
@@ -321,7 +332,7 @@ int envoie_couleurs_table(int socketfd){
   int balise_count = 0;
   
   printf("How many colors are you sending ? (limited to 30) ");
-  fgets(input, sizeof(input), stdin);
+  fgets(input, sizeof(char)*30, stdin);
   if(input[strlen(input) - 1] == '\n'){
     input[strlen(input) - 1] = '\0';
   }
@@ -339,11 +350,11 @@ int envoie_couleurs_table(int socketfd){
   
   strcat(data, input);
   strcat(data, "\",\"");
-  memset(input, 0, sizeof(input));
+  memset(input, 0, sizeof(char)*30);
 
-  for(size_t i = 0; i < balise_count; i++){
+  for(int i = 0; i < balise_count; i++){
     printf("Enter a colors (max len: 30): ");
-    fgets(input, sizeof(input), stdin);
+    fgets(input, sizeof(char)*30, stdin);
     if(input[strlen(input) - 1] == '\n'){
       input[strlen(input) - 1] = '\0';
     }
@@ -352,7 +363,7 @@ int envoie_couleurs_table(int socketfd){
     if(i + 1 != balise_count){
       strcat(data, ",\"");
     }
-    memset(input, 0, sizeof(input));
+    memset(input, 0, sizeof(char)*30);
   }
 
   strcat(data, "]}");
@@ -362,9 +373,9 @@ int envoie_couleurs_table(int socketfd){
     return EXIT_FAILURE;
   }
 
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
-  if(read(socketfd, data, sizeof(data)) < 0){
+  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
     perror("Error receiving message");
     return EXIT_FAILURE;
   }
@@ -383,7 +394,7 @@ int command_builder(int socketfd){
   char command[10];
 
   printf("Veuiller choisir une fonction à exécuter (HELP pour plus d'informations !):");
-  fgets(command, sizeof(command), stdin);
+  fgets(command, sizeof(char)*10, stdin);
 
   if (strcmp(command, "HELP\n") == 0){
     printf("Voici la liste de toutes les commandes: \nMSG: Permet d'envoyer un message au serveur avec une réponse de sa part !\nCALC : Permet d'envoyer un calcul au serveur avec le résultat en retour !\nCOLOR : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\nTAGS : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n");
@@ -415,7 +426,7 @@ int command_builder(int socketfd){
   }
   else if(strcmp(command, "ANLZ\n") == 0){
     printf("Mode analise activé : ");
-    envoie_couleurs(socketfd);
+    envoie_couleurs(socketfd, NULL);
   }
 
   return 1;

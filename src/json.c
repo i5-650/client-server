@@ -20,22 +20,6 @@
     return code;
  }
 
-char* get_message(char* data){
-    char* message;
-    strcpy(message, &data[strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART)]);
-    message[strlen(message)-2] = '\0';
-    free(&message[strlen(message)]);
-    return message;
-}
-
-char* get_name(char* data){
-    char* message;
-    strcpy(message, &data[strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART)]);
-    message[strlen(message)-2] = '\0';
-    free(&message[strlen(message)]);
-    return message;
-}
-
 char* get_word_till_quote(char* data){
     unsigned int end_index = 0;
     for(size_t i = 0; i < strlen(data); ++i){
@@ -111,9 +95,4 @@ int set_calcul(char* calc, char* data){
     strcat(data, "\"]}");
 
     return EXIT_SUCCESS;
-}
-
-int set_colors(char* colors, char* data){
-    // TODO: maxime
-    return EXIT_FAILURE;
 }
