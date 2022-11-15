@@ -231,7 +231,6 @@ int envoie_couleurs(int socketfd){
 
   memset(data, 0, sizeof(data));
   analyse(pathname, data);
-  printf("\ndata: %s", data);
 
   int status = write(socketfd, data, strlen(data));
   if (status < 0){
