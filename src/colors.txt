@@ -1,3 +1,5 @@
 couleurs: 2
 couleurs: 1
 couleurs: 1,0x√0445334
+colors: 1,#490394
+colors: 10,#d5d9d8,#d3d7d6,#dddfde,#d4d8d7,#e0e2e1,#d2d6d7,#d8dcdb,#dfe1de,#d9dddc,#d6dad9colors: 10,#d5d9d8,#d3d7d6,#dddfde,#d4d8d7,#e0e2e1,#d2d6d7,#d8dcdb,#dfe1de,#d9dddc,#d6dad9
