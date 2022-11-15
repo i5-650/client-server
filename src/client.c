@@ -186,7 +186,10 @@ void analyse(char *pathname, char *data){
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  char temp_string[10] = "\"10\",\"";
+  char temp_string[1024] = FIRST_JSON_PART;
+  strcat(temp_string, CODE_ANL);
+  strcat(temp_string, ARRAY_JSON_PART);
+  strcat(temp_string,"\"10\",");
   if (cc->size < 10){
     sprintf(temp_string, "%d,", cc->size);
   }
@@ -195,15 +198,14 @@ void analyse(char *pathname, char *data){
   // choisir 10 couleurs
   for (count = 1; count < 11 && cc->size - count > 0; count++){
     if (cc->compte_bit == BITS32){
-      sprintf(temp_string, "#%02x%02x%02x,", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "\"#%02x%02x%02x\",", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
 
     if (cc->compte_bit == BITS24){
-      sprintf(temp_string, "#%02x%02x%02x,", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "\"#%02x%02x%02x\",", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
 
     strcat(data, temp_string);
-    strcat(data, "\",");
   }
   data[strlen(data) - 1] = '\0';
   strcat(data, "]}");
@@ -213,7 +215,7 @@ int envoie_couleurs(int socketfd){
   char data[1024];
   char pathname[1024];
 
-  printf("Veuillez renseigner le chemin d'accès de votre image:\n");
+  printf("\nVeuillez renseigner le chemin d'accès de votre image:\n");
   fgets(pathname,sizeof(pathname),stdin);
   pathname[strlen(pathname)-1] = '\0';
 

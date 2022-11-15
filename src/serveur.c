@@ -177,7 +177,8 @@ int recois_envoie_message(int client_socket_fd){
     }
   }
   else {
-    plot(code);
+    save_tags(data);
+    plot(data);
     //printf("Couldn't satisfy command\n");
   }
 
@@ -243,6 +244,7 @@ int recois_balises(int socketfd, char *data){
 }
 
 int save_tags(char *tags){
+
   FILE *fd = fopen(TAGS_DATABASE, "a");
   
   if (fd == NULL){
