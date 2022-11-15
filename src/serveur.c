@@ -140,9 +140,9 @@ int renvoie_name(int client_socket_fd, char *data){
  */
 int recois_envoie_message(int client_socket_fd){
   char data[1024];
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
-  int data_size = read(client_socket_fd, (void *)data, sizeof(data));
+  int data_size = read(client_socket_fd, (void *)data, sizeof(char)*DATA_LEN);
   if (data_size < 0){
     perror("erreur lecture");
     return EXIT_FAILURE;
@@ -204,7 +204,7 @@ int recois_couleurs(int client_socket_fd, char *data){
   fptr = fopen(FILE_COLORS, "a");
 
   if (fptr == NULL){
-    memset(data, 0, sizeof(data));
+    memset(data, 0, sizeof(char)*DATA_LEN);
     strcpy(data, FIRST_JSON_PART);
     strcat(data, CODE_ERR);
     strcat(data, ARRAY_JSON_PART);
@@ -225,7 +225,7 @@ int recois_couleurs(int client_socket_fd, char *data){
     return EXIT_FAILURE;
   }
 
-  memset(data, 0, sizeof(data));
+  memset(data, 0, sizeof(char)*DATA_LEN);
   strcpy(data, FIRST_JSON_PART);
   strcat(data, CODE_OKK);
   strcat(data, ARRAY_JSON_PART);

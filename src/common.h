@@ -10,6 +10,7 @@
 #define CODE_ANL "anl"
 
 #define CODE_LEN 3
+#define DATA_LEN 1024
 
 #define FIRST_JSON_PART "{\"code\":\""
 #define ARRAY_JSON_PART "\",\"values\":["
