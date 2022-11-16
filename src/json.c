@@ -50,8 +50,8 @@ int set_code(const char code[3], char* data){
 }
 
 int set_message(char *message, char* data){
+    prepare_message(data, CODE_MSG);
     strcat(data, "\"");
-    printf("char: %c", message[strlen(message) -1]);
     if(message[strlen(message) - 1] == '\n'){
         message[strlen(message) - 1] = '\0';
     }
@@ -61,6 +61,7 @@ int set_message(char *message, char* data){
 }
 
 int set_name(char* name, char* data){
+    prepare_message(data, CODE_NAM);
     strcat(data, "\"");
     if(name[strlen(name) - 1] == '\n'){
         name[strlen(name) - 1] = '\0';
@@ -71,6 +72,7 @@ int set_name(char* name, char* data){
 }
 
 int set_calcul(char* calc, char* data){
+    prepare_message(data, CODE_CAL);
     strcat(data, "\"");
     strncat(data, calc, 1);
     strcat(data, "\",\"");
@@ -95,4 +97,42 @@ int set_calcul(char* calc, char* data){
     strcat(data, "\"]}");
 
     return EXIT_SUCCESS;
+}
+
+void create_error_message(char* data, const char* erreur_messsage){
+    prepare_message(data, CODE_ERR);
+    strcat(data, "error: \"");
+    strcat(data, erreur_messsage);
+    strcat(data, "\"]}");
+}
+
+void create_ok_message(char* data, const char* okk_message){
+    prepare_message(data, CODE_OKK);
+    strcat(data, "\"");
+    strcat(data, okk_message);
+    strcat(data, "\"]}");
+}
+
+void prepare_message(char* data, const char code[3]){
+    strcpy(data, FIRST_JSON_PART);
+    strcat(data, code);
+    strcat(data, ARRAY_JSON_PART);
+}
+
+void add_element(char* data, const char* elem){
+    strcat(data, ",\"");
+    strcat(data, elem);
+    strcat(data, "\"");
+}
+
+void add_first_element(char* data, const char* element){
+    strcat(data, "\"");
+    strcat(data, element);
+    strcat(data, "\"");
+}
+
+void remove_last_newline(char* data){
+    if(data[strlen(data) - 1] == '\n'){
+        data[strlen(data) - 1] = '\0';
+    }
 }

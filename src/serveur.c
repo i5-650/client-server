@@ -26,7 +26,7 @@ int main(){
   //Creation d'une socket
   socketfd = socket(AF_INET, SOCK_STREAM, 0);
   if (socketfd < 0){
-    perror("Unable to open a socket");
+    perror("[/!\\] Unable to open a socket");
     return -1;
   }
   printf("[+] Socket created\n");
@@ -59,7 +59,7 @@ int main(){
   printf("[+] New client connected !\n");
   
   if(recois_envoie_message(client_socket_fd) < 0){
-    perror("Error during first connection: ");
+    perror("[/!\\] Error during first connection: ");
   }
 
   while (1){
@@ -72,7 +72,6 @@ int main(){
 void plot(char *data){
   // Extraire le compteur et les couleurs RGB
   FILE *p = fopen("gnuplot.txt", "a");
-  printf("Plot\n");
   int count = 0;
   int n;
 
@@ -93,19 +92,16 @@ void plot(char *data){
 
     if (count == 0){
       sscanf(token,"\"%d\"",&n);
-      printf("n = %d\n", n);
     }
     else{
       // Le numéro 36, parceque 360° (cercle) / 10 couleurs = 36
       fprintf(p, "0 0 10 %d %d 0x%s\n", (count - 1) * 36, count * 36, token + 1);
-      printf("%d: %s\n", count, token);
     }
     count++;
     start_delimiter+=strlen(token)+1;
   }
 
   fprintf(p, "e\n");
-  printf("Plot: FIN\n");
   fclose(p);
 }
 
@@ -115,7 +111,7 @@ int renvoie_message(int client_socket_fd, char *data){
   int data_size = write(client_socket_fd, (void *)data, strlen(data));
 
   if (data_size < 0){
-    perror("erreur ecriture");
+    perror("[/!\\] erreur ecriture");
     return (EXIT_FAILURE);
   }
 
@@ -123,11 +119,11 @@ int renvoie_message(int client_socket_fd, char *data){
 }
 
 int renvoie_name(int client_socket_fd, char *data){
-  printf("%s \n", data);
+  printf("[+] Sending back: %s \n", data);
   int data_size = write(client_socket_fd, (void *)data, strlen(data));
 
   if (data_size < 0){
-    perror("erreur ecriture");
+    perror("[/!\\] erreur ecriture");
     return (EXIT_FAILURE);
   }
 
@@ -148,36 +144,36 @@ int recois_envoie_message(int client_socket_fd){
     return EXIT_FAILURE;
   }
 
-  printf("Données recus: %s\n", data);
+  printf("[+] Données recus: %s\n", data);
   char *code = get_code(data);
 
   if(!strncmp(code, CODE_MSG, 3)){
     if(renvoie_message(client_socket_fd, data)){
-      printf("An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message");
     }
   }
   else if(!strncmp(code, CODE_NAM, 3)){
     if(renvoie_name(client_socket_fd, data)){
-      printf("An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message");
     }
   }
   else if(!strncmp(code, CODE_TAG, 3)){
     if(recois_balises(client_socket_fd, data)){
-      printf("An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message");
     }
   }
   else if(!strncmp(code, CODE_COL, 3)){
     if(recois_couleurs(client_socket_fd, data)){
-      printf("An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message");
     }
   }
   else if(!strncmp(code, CODE_CAL, 3)){
     if(calcul(client_socket_fd, data)){
-      printf("An error occured while sending a messages\n");
+      printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(strcmp(data, "exit") == 0){
-    printf("Client disconnected\n");
+    printf("[-] Client disconnected\n");
     close(client_socket_fd);
     exit(EXIT_SUCCESS);
   }
@@ -185,14 +181,10 @@ int recois_envoie_message(int client_socket_fd){
     save_tags(data);
     plot(data);
     memset(data, 0, sizeof(char)*1024);
-    strcpy(data, FIRST_JSON_PART);
-    strcat(data, CODE_OKK);
-    strcat(data, ARRAY_JSON_PART);
-    strcat(data, "\"Colors saved\"]}");
+    create_ok_message(data, "Colors saved");
     if(write(client_socket_fd, (void *)data, strlen(data))){
-      printf("An error occured while sending a message"); 
+      printf("[/!\\] An error occured while sending a message"); 
     }
-    //printf("Couldn't satisfy command\n");
   }
   free(code);
   return EXIT_SUCCESS;
@@ -205,12 +197,9 @@ int recois_couleurs(int client_socket_fd, char *data){
 
   if (fptr == NULL){
     memset(data, 0, sizeof(char)*DATA_LEN);
-    strcpy(data, FIRST_JSON_PART);
-    strcat(data, CODE_ERR);
-    strcat(data, ARRAY_JSON_PART);
-    strcat(data, "\"Err: colors couldn't be saved\"]}");
+    create_error_message(data, "colors couldn't be saved");
     if(write(client_socket_fd, (void*)data, strlen(data))){
-      printf("An error occured while sending messages\n");
+      printf("[/!\\] An error occured while sending messages\n");
     }
     exit(EXIT_FAILURE);
   }
@@ -221,35 +210,27 @@ int recois_couleurs(int client_socket_fd, char *data){
   int data_size = write(client_socket_fd, (void *)data, strlen(data));
 
   if (data_size < 0){
-    perror("error while writing file");
+    perror("[/!\\] error while writing file");
     return EXIT_FAILURE;
   }
 
   memset(data, 0, sizeof(char)*DATA_LEN);
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_OKK);
-  strcat(data, ARRAY_JSON_PART);
-  strcat(data, "\"Okk: colors saved\"]}");
+  create_ok_message(data, "Colors saved");
 
   return EXIT_SUCCESS;
 }
 
 int recois_balises(int socketfd, char *data){
   if (save_tags(data)){
-    perror("Error saving tags");  strcpy(data, FIRST_JSON_PART);
-    strcat(data, CODE_ERR);
-    strcat(data, ARRAY_JSON_PART);
-    strcat(data, "\"Err: tags couldn't be saved\"]}");
+    perror("[/!\\] Error saving tags");  strcpy(data, FIRST_JSON_PART);
+    create_error_message(data, "tags couldn't be saved");
     return EXIT_FAILURE;
   }
 
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_OKK);
-  strcat(data, ARRAY_JSON_PART);
-  strcat(data, "\"Okk: tags saved\"]}");
+  create_ok_message(data, "tags saved");
 
   if(renvoie_message(socketfd, data)){
-    perror("Error responding to client");
+    perror("[/!\\] Error responding to client");
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
@@ -260,12 +241,12 @@ int save_tags(char *tags){
   FILE *fd = fopen(TAGS_DATABASE, "a");
   
   if (fd == NULL){
-    perror("Error opening the file");
+    perror("[/!\\] Error opening the file");
     return EXIT_FAILURE;
   }
 
   if (fprintf(fd, "%s\n", tags) < 0){
-    perror("Error writing tags");
+    perror("[/!\\] Error writing tags");
     return EXIT_FAILURE;
   }
 
