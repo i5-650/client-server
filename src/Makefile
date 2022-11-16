@@ -30,5 +30,5 @@ $(CLIENT): $(CLIENT_OBJS)
 	$(CC) $(DEBUG) $(CFLAGS) -c $*.c
 
 clean: 
-	rm -rf *.o *.out
+	rm -rf *.o *.out *.txt
 

@@ -44,10 +44,7 @@ int calcul(int client_socket_fd, char *data){
   c->nums[0] = 0.0;
   c->nums[1] = 0.0;
   if(get_calcul(data, c)){
-    strcpy(data, FIRST_JSON_PART);
-    strcat(data, CODE_ERR);
-    strcat(data, ARRAY_JSON_PART);
-    strcat(data, "error: parsing input\"]}");
+    create_error_message(data, "parsing input");
   }
 
   int status = calculator(c, &result);
@@ -55,38 +52,21 @@ int calcul(int client_socket_fd, char *data){
 
   switch(status){
     case -1:
-      strcpy(data, FIRST_JSON_PART);
-      strcat(data, CODE_ERR);
-      strcat(data, ARRAY_JSON_PART);
-      strcat(data, "error: invalid operation\"]}");
+      create_error_message(data, "invalid operation");
       break;
     case -2:
-      strcpy(data, FIRST_JSON_PART);
-      strcat(data, CODE_ERR);
-      strcat(data, ARRAY_JSON_PART);
-      strcat(data, "error: Invalid input - couldn't parse data\"]}");
+      create_error_message(data, "Invalid input - couldn't parse data");
       break;
     case -3:
-      strcpy(data, FIRST_JSON_PART);
-      strcat(data, CODE_ERR);
-      strcat(data, ARRAY_JSON_PART);
-      strcat(data, "error : Impossible operation\"]}");
+      create_error_message(data, "Impossible operation");
       break;
     default:
     printf("result %f\n", result);
       if(sprintf(tmp, "%f", result) < 0){
-        strcpy(data, FIRST_JSON_PART);
-        strcat(data, CODE_ERR);
-        strcat(data, ARRAY_JSON_PART);
-        strcpy(data, "error : Internal server error\"]}");
+        create_error_message(data, "Internal server error");
       }
       else {
-        strcpy(data, FIRST_JSON_PART);
-        strcat(data, CODE_CAL);
-        strcat(data, ARRAY_JSON_PART);
-        strcat(data, "\"");
-        strcat(data, tmp);
-        strcat(data, "\"]}");
+        set_message(tmp, data);
       }
   }
   free(c);

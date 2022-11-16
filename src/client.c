@@ -82,20 +82,16 @@ int envoie_recois_calcul(int socketfd){
 
   // Demandez à l'utilisateur d'entrer un message
   char message[1024];
-  printf("Votre calcul (max 1000 caracteres): ");
+  printf("[+] Votre calcul (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
 
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_CAL);
-  strcat(data, ARRAY_JSON_PART);
-  
   if(set_calcul(message, data)){
     return EXIT_FAILURE;
   }
 
   int write_status = write(socketfd, data, strlen(data));
   if(write_status < 0){
-    perror("erreur ecriture");
+    perror("[/!\\] erreur ecriture");
     exit(EXIT_FAILURE);
   }
 
@@ -105,11 +101,11 @@ int envoie_recois_calcul(int socketfd){
   // lire les données de la socket
   int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if(read_status < 0){
-    perror("erreur lecture");
+    perror("[/!\\] erreur lecture");
     return -1;
   }
 
-  printf("Message recu: %s\n", data);
+  printf("[+] Message recu: %s\n", data);
 
   return 0;
 }
@@ -121,20 +117,16 @@ int envoie_recois_message(int socketfd){
 
   // Demandez à l'utilisateur d'entrer un message
   char message[1024];
-  printf("Votre message (max 1000 caracteres): ");
+  printf("[+] Votre message (max 1000 caracteres): ");
   fgets(message, sizeof(message), stdin);
 
-
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_MSG);
-  strcat(data, ARRAY_JSON_PART);
   if(set_message(message, data)){
     return EXIT_FAILURE;
   }
 
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0){
-    perror("erreur ecriture");
+    perror("[/!\\] erreur ecriture");
     exit(EXIT_FAILURE);
   }
 
@@ -144,11 +136,11 @@ int envoie_recois_message(int socketfd){
   // lire les données de la socket
   int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if (read_status < 0){
-    perror("erreur lecture");
+    perror("[/!\\] erreur lecture");
     return -1;
   }
 
-  printf("Message recu: %s\n", data);
+  printf("[+] Message recu: %s\n", data);
 
   return 0;
 }
@@ -163,17 +155,13 @@ int envoie_recois_name(int socketfd){
   hostname[1023] = '\0';
   gethostname(hostname, 1023);
 
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_NAM);
-  strcat(data, ARRAY_JSON_PART);
-
-  if(set_message(hostname, data)){
+  if(set_name(hostname, data)){
     return EXIT_FAILURE;
   }
 
   int write_status = write(socketfd, data, strlen(data));
   if (write_status < 0){
-    perror("erreur ecriture");
+    perror("[/!\\] erreur ecriture");
     exit(EXIT_FAILURE);
   }
 
@@ -183,11 +171,9 @@ int envoie_recois_name(int socketfd){
   // lire les données de la socket
   int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if (read_status < 0){
-    perror("erreur lecture");
+    perror("[/!\\] erreur lecture");
     return -1;
   }
-
-  printf("Nom recu: %s\n", data);
 
   return 0;
 }
@@ -197,28 +183,27 @@ void analyse(char *pathname, char *data){
   couleur_compteur *cc = analyse_bmp_image(pathname);
 
   int count;
-  char temp_string[1024] = FIRST_JSON_PART;
-  strcat(temp_string, CODE_ANL);
-  strcat(temp_string, ARRAY_JSON_PART);
-  strcat(temp_string,"\"10\",");
+  char temp_string[10];
+  prepare_message(data, CODE_ANL);
+  add_first_element(data, "10");
   if (cc->size < 10){
-    sprintf(temp_string, "%d,", cc->size);
+    sprintf(data, "%d,", cc->size);
   }
-  strcat(data, temp_string);
 
   // choisir 10 couleurs
   for (count = 1; count < 11 && cc->size - count > 0; count++){
     if (cc->compte_bit == BITS32){
-      sprintf(temp_string, "\"#%02x%02x%02x\",", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "#%02x%02x%02x", cc->cc.cc24[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
 
     if (cc->compte_bit == BITS24){
-      sprintf(temp_string, "\"#%02x%02x%02x\",", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
+      sprintf(temp_string, "#%02x%02x%02x", cc->cc.cc32[cc->size - count].c.rouge, cc->cc.cc32[cc->size - count].c.vert, cc->cc.cc32[cc->size - count].c.bleu);
     }
 
-    strcat(data, temp_string);
+    add_element(data, temp_string);
   }
-  data[strlen(data) - 1] = '\0';
+  remove_last_newline(data);
+  //data[strlen(data) - 1] = '\0';
   strcat(data, "]}");
 }
 
@@ -227,7 +212,7 @@ int envoie_couleurs(int socketfd, char* image_path){
   char pathname[1024];
   
   if(image_path == NULL){
-    printf("Veuillez entrer le chemin de l'image: ");
+    printf("[+] Veuillez entrer le chemin de l'image: ");
     fgets(image_path, sizeof(char)*DATA_LEN, stdin);
     image_path[strlen(image_path) - 1] = '\0';
   }
@@ -236,7 +221,7 @@ int envoie_couleurs(int socketfd, char* image_path){
   }
 
 
-  printf("\nVeuillez renseigner le chemin d'accès de votre image:\n");
+  printf("\n[+] Veuillez renseigner le chemin d'accès de votre image:\n");
   fgets(pathname,sizeof(char)*DATA_LEN,stdin);
   pathname[strlen(pathname)-1] = '\0';
 
@@ -245,18 +230,18 @@ int envoie_couleurs(int socketfd, char* image_path){
 
   int status = write(socketfd, data, strlen(data));
   if (status < 0){
-    perror("Error writing to socket");
+    perror("[/!\\] Error writing to socket");
     exit(EXIT_FAILURE);
   }
 
   status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if(status < 0){
-    perror("Error receiving server response");
+    perror("[/!\\] Error receiving server response");
     return EXIT_FAILURE;
   }
 
   if(strncmp(&data[strlen(ARRAY_JSON_PART)], CODE_OKK, 3) == 0){
-    printf("Colors saved\n");
+    printf("[+] Colors saved\n");
     return EXIT_SUCCESS;
   }
   return 0;
@@ -267,127 +252,111 @@ int envoie_balise(int socketfd){
   char input[30];
   int balise_count = 0;
   
-  printf("How many tags are you sending ? (limited to 30) ");
+  printf("[+] How many tags are you sending ? (limited to 30) ");
   fgets(input, sizeof(char)*30, stdin);
-  if(input[strlen(input) - 1] == '\n'){
-    input[strlen(input) - 1] = '\0';
-  }
+  remove_last_newline(input);
 
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_TAG);
-  strcat(data, ARRAY_JSON_PART);
-  strcat(data, "\"");
+  prepare_message(data, CODE_TAG);
 
-  sscanf(input, "%d", &balise_count);
-  
-  if(balise_count <= 0 || balise_count > 30){
+  if(sscanf(input, "%d", &balise_count)<1){
+    printf("[/!\\] Invalid number of tags\n");
     return EXIT_FAILURE;
   }
   
-  strcat(data, input);
-  strcat(data, "\",\"");
+  if(balise_count <= 0 || balise_count > 30){
+    printf("[/!\\] Invalid number of tags\n");
+    return EXIT_FAILURE;
+  }
+
+  add_first_element(data, input);
   memset(input, 0, sizeof(input));
 
   for(int i = 0; i < balise_count; i++){
-    printf("Enter a tag (max len: 30): ");
+    printf("[+] Enter a tag (max len: 30): ");
     fgets(input, sizeof(char)*30, stdin);
-    if(input[strlen(input) - 1] == '\n'){
-      input[strlen(input) - 1] = '\0';
-    }
-    strcat(data, input);
-    strcat(data, "\"");
-    if(i + 1 != balise_count){
-      strcat(data, ",\"");
-    }
+    remove_last_newline(input);
+    add_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
   strcat(data, "]}");
 
   if(write(socketfd, (void *)data, strlen(data)) < 0){
-    perror("Error sending message");
+    perror("[/!\\] Error sending message");
     return EXIT_FAILURE;
   }
 
   memset(data, 0, sizeof(char)*DATA_LEN);
 
   if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
-    perror("Error receiving message");
+    perror("[/!\\] Error receiving message");
     return EXIT_FAILURE;
   }
 
   if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
-    perror("An error occured on the server");
+    perror("[/!\\] An error occured on the server");
     return EXIT_FAILURE;
   }
 
-  printf("Messages received and saved\n");
+  printf("[+] Messages received and saved\n");
   return EXIT_SUCCESS;
 }
 
 int envoie_couleurs_table(int socketfd){
-  char data[1024];
+ char data[1024];
   char input[30];
   int balise_count = 0;
   
-  printf("How many colors are you sending ? (limited to 30) ");
+  printf("[+] How many colors are you sending ? (limited to 30) ");
   fgets(input, sizeof(char)*30, stdin);
-  if(input[strlen(input) - 1] == '\n'){
-    input[strlen(input) - 1] = '\0';
-  }
+  remove_last_newline(input);
 
-  strcpy(data, FIRST_JSON_PART);
-  strcat(data, CODE_TAG);
-  strcat(data, ARRAY_JSON_PART);
-  strcat(data, "\"");
+  prepare_message(data, CODE_TAG);
 
-  sscanf(input, "%d", &balise_count);
-  
-  if(balise_count <= 0 || balise_count > 30){
+  if(sscanf(input, "%d", &balise_count)<1){
+    printf("[/!\\] Invalid number of colors\n");
     return EXIT_FAILURE;
   }
   
-  strcat(data, input);
-  strcat(data, "\",\"");
-  memset(input, 0, sizeof(char)*30);
+  if(balise_count <= 0 || balise_count > 30){
+    printf("[/!\\] Invalid number of colors\n");
+    return EXIT_FAILURE;
+  }
+
+  add_first_element(data, input);
+  memset(input, 0, sizeof(input));
 
   for(int i = 0; i < balise_count; i++){
-    printf("Enter a colors (max len: 30): ");
+    printf("[+] Enter a color (max len: 30): ");
     fgets(input, sizeof(char)*30, stdin);
-    if(input[strlen(input) - 1] == '\n'){
-      input[strlen(input) - 1] = '\0';
-    }
-    strcat(data, input);
-    strcat(data, "\"");
-    if(i + 1 != balise_count){
-      strcat(data, ",\"");
-    }
+    remove_last_newline(input);
+    add_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
   strcat(data, "]}");
 
   if(write(socketfd, (void *)data, strlen(data)) < 0){
-    perror("Error sending message");
+    perror("[/!\\] Error sending message");
     return EXIT_FAILURE;
   }
 
   memset(data, 0, sizeof(char)*DATA_LEN);
 
   if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
-    perror("Error receiving message");
+    perror("[/!\\] Error receiving message");
     return EXIT_FAILURE;
   }
 
   if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
-    perror("An error occured on the server");
+    perror("[/!\\] An error occured on the server");
     return EXIT_FAILURE;
   }
 
-  printf("Messages received and saved\n");
+  printf("[+] Messages received and saved\n");
   return EXIT_SUCCESS;
-  return 0;
 }
+
 
 int command_builder(int socketfd){
   char command[10];
@@ -396,36 +365,39 @@ int command_builder(int socketfd){
   fgets(command, sizeof(char)*10, stdin);
 
   if (strcmp(command, "HELP\n") == 0){
-    printf("Voici la liste de toutes les commandes: \nMSG: Permet d'envoyer un message au serveur avec une réponse de sa part !\nCALC : Permet d'envoyer un calcul au serveur avec le résultat en retour !\nCOLOR : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\nTAGS : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n");
+    printf("[*] Voici la liste de toutes les commandes: \n\t[*] MSG: Permet d'envoyer un message au serveur avec une réponse de sa part !\n\t[*] CALC : Permet d'envoyer un calcul au serveur avec le résultat en retour !\n\t[*] COLOR : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n\t[*] TAGS : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n\t[*] ANLZ : Permet d'analyser les couleurs d'une image et de les envoyer au serveur pour les sauvegarder.\n");
     return 0;
   }
   else if (strcmp(command, "MSG\n") == 0){
-    printf("Mode message activé : \n");
+    printf("[+] Mode message activé : \n");
     envoie_recois_message(socketfd);
     return 0;
   }
   else if (strcmp(command, "CALC\n") == 0){
-    printf("Mode calcul activé : \n");
+    printf("[+] Mode calcul activé : \n");
     if(envoie_recois_calcul(socketfd)){
       printf("TOUT CASSÉ\n");
     }
     return 0;
   }
   else if (strcmp(command, "COLOR\n") == 0){
-    printf("Mode couleurs activé : ");
+    printf("[+] Mode couleurs activé : ");
     envoie_couleurs_table(socketfd);
     return 0;
   }
   else if(strcmp(command, "TAGS\n") == 0){
+    printf("[+] Mode balises activé: \n");
     if(envoie_balise(socketfd)){
-      printf("Error occured during tags sending\n");
+      printf("[/!\\] Error occured during tags sending\n");
       return EXIT_FAILURE;
     }
     return 0;
   }
   else if(strcmp(command, "ANLZ\n") == 0){
-    printf("Mode analise activé : ");
-    envoie_couleurs(socketfd, NULL);
+    printf("[+] Mode analise activé : \n");
+    if(envoie_couleurs(socketfd, NULL)){
+      printf("[/!\\] Error occured during image handling\n");
+    }
   }
 
   return 1;

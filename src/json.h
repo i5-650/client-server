@@ -14,13 +14,20 @@
 #include "common.h"
 #include "operations.h"
 
-char* get_code(char* data);
+void remove_last_newline(char* data);
 
+char* get_code(char* data);
 int get_calcul(char* data, struct Calc *to_calc);
 
 int set_code(const char code[3], char* data);
 int set_message(char *message, char* data);
 int set_name(char* name, char* data);
 int set_calcul(char* calc, char* data);
+
+void create_error_message(char* data, const char* erreur_messsage);
+void create_ok_message(char* data, const char* okk_message);
+void prepare_message(char* data, const char code[3]);
+void add_element(char* data, const char* element);
+void add_first_element(char* data, const char* element);
 
 #endif // __JSON_H__
