@@ -178,7 +178,7 @@ int recois_envoie_message(int client_socket_fd){
     exit(EXIT_SUCCESS);
   }
   else {
-    save_tags(data);
+    save_in_file(data, COLORS_DATABASE);
     plot(data);
     memset(data, 0, sizeof(char)*1024);
     create_ok_message(data, "Colors saved");
@@ -221,7 +221,7 @@ int recois_couleurs(int client_socket_fd, char *data){
 }
 
 int recois_balises(int socketfd, char *data){
-  if (save_tags(data)){
+  if (save_in_file(data, TAGS_DATABASE)){
     perror("[/!\\] Error saving tags");  strcpy(data, FIRST_JSON_PART);
     create_error_message(data, "tags couldn't be saved");
     return EXIT_FAILURE;
@@ -236,9 +236,9 @@ int recois_balises(int socketfd, char *data){
   return EXIT_SUCCESS;
 }
 
-int save_tags(char *tags){
+int save_in_file(char *tags, const char* file_to_save){
 
-  FILE *fd = fopen(TAGS_DATABASE, "a");
+  FILE *fd = fopen(file_to_save, "a");
   
   if (fd == NULL){
     perror("[/!\\] Error opening the file");
