@@ -27,7 +27,7 @@
 
 int socketfd;
 
-int main(int argc, char **argv){
+int main(){
   signal(SIGINT, manage_signal);
 
   struct sockaddr_in server_addr;
@@ -51,16 +51,10 @@ int main(int argc, char **argv){
     exit(EXIT_FAILURE);
   }
 
-  if (argc != 2){
-    envoie_recois_name(socketfd);
-    while (1){
-      command_builder(socketfd);
-    }
+  envoie_recois_name(socketfd);
+  while (1){
+    command_builder(socketfd);
   }
-  else{
-    envoie_couleurs(socketfd, argv[1]);
-  }
-
   close(socketfd);
 }
 
@@ -207,19 +201,9 @@ void analyse(char *pathname, char *data){
   strcat(data, "]}");
 }
 
-int envoie_couleurs(int socketfd, char* image_path){
+int envoie_couleurs(int socketfd){
   char data[1024];
   char pathname[1024];
-  
-  if(image_path == NULL){
-    printf("[+] Veuillez entrer le chemin de l'image: ");
-    fgets(image_path, sizeof(char)*DATA_LEN, stdin);
-    image_path[strlen(image_path) - 1] = '\0';
-  }
-  else {
-    strncpy(data, image_path, 1024);
-  }
-
 
   printf("\n[+] Veuillez renseigner le chemin d'accès de votre image:\n");
   fgets(pathname,sizeof(char)*DATA_LEN,stdin);
@@ -395,7 +379,7 @@ int command_builder(int socketfd){
   }
   else if(strcmp(command, "ANLZ\n") == 0){
     printf("[+] Mode analise activé : \n");
-    if(envoie_couleurs(socketfd, NULL)){
+    if(envoie_couleurs(socketfd)){
       printf("[/!\\] Error occured during image handling\n");
     }
   }
