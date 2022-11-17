@@ -149,22 +149,22 @@ int recois_envoie_message(int client_socket_fd){
 
   if(!strncmp(code, CODE_MSG, 3)){
     if(renvoie_message(client_socket_fd, data)){
-      printf("[/!\\] An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_NAM, 3)){
     if(renvoie_name(client_socket_fd, data)){
-      printf("[/!\\] An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_TAG, 3)){
     if(recois_balises(client_socket_fd, data)){
-      printf("[/!\\] An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_COL, 3)){
     if(recois_couleurs(client_socket_fd, data)){
-      printf("[/!\\] An error occured while sending a message");
+      printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_CAL, 3)){
@@ -182,7 +182,8 @@ int recois_envoie_message(int client_socket_fd){
     plot(data);
     memset(data, 0, sizeof(char)*1024);
     create_ok_message(data, "Colors saved");
-    if(write(client_socket_fd, (void *)data, strlen(data))){
+    printf("\n Data :%s\n",data);
+    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
       printf("[/!\\] An error occured while sending a message"); 
     }
   }

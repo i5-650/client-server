@@ -217,6 +217,7 @@ int envoie_couleurs(int socketfd){
     perror("[/!\\] Error writing to socket");
     exit(EXIT_FAILURE);
   }
+  memset(data, 0, sizeof(char)*DATA_LEN);
 
   status = read(socketfd, data, sizeof(char)*DATA_LEN);
   if(status < 0){
@@ -224,10 +225,7 @@ int envoie_couleurs(int socketfd){
     return EXIT_FAILURE;
   }
 
-  if(strncmp(&data[strlen(ARRAY_JSON_PART)], CODE_OKK, 3) == 0){
-    printf("[+] Colors saved\n");
-    return EXIT_SUCCESS;
-  }
+  printf("[+] Message recu: %s\n", data);
   return 0;
 }
 
