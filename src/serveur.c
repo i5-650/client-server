@@ -182,7 +182,6 @@ int recois_envoie_message(int client_socket_fd){
     plot(data);
     memset(data, 0, sizeof(char)*1024);
     create_ok_message(data, "Colors saved");
-    printf("\n Data :%s\n",data);
     if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
       printf("[/!\\] An error occured while sending a message"); 
     }
@@ -199,7 +198,7 @@ int recois_couleurs(int client_socket_fd, char *data){
   if (fptr == NULL){
     memset(data, 0, sizeof(char)*DATA_LEN);
     create_error_message(data, "colors couldn't be saved");
-    if(write(client_socket_fd, (void*)data, strlen(data))){
+    if(write(client_socket_fd, (void*)data, strlen(data)) < 0){
       printf("[/!\\] An error occured while sending messages\n");
     }
     exit(EXIT_FAILURE);
