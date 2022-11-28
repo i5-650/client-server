@@ -153,11 +153,12 @@ int renvoie_name(int client_socket_fd, char *data){
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
  */
-int recois_envoie_message(int client_socket_fd){
+int recois_envoie_message(struct Client* cli){
   char data[1024];
   memset(data, 0, sizeof(char)*DATA_LEN);
 
-  int data_size = read(client_socket_fd, (void *)data, sizeof(char)*DATA_LEN);
+
+  int data_size = read(cli->socketfd, (void *)data, sizeof(char)*DATA_LEN);
   if (data_size < 0){
     perror("erreur lecture");
     return EXIT_FAILURE;
@@ -168,47 +169,49 @@ int recois_envoie_message(int client_socket_fd){
     return EXIT_FAILURE;
   }
 
-  printf("[+] Données recus: %s\n", data);
+  printf("[%s] Données recus: %s\n",cli->name, data);
   char *code = get_code(data);
 
   if(!strncmp(code, CODE_MSG, 3)){
-    if(renvoie_message(client_socket_fd, data)){
+    if(renvoie_message(cli->socketfd, data)){
       printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_NAM, 3)){
-    if(renvoie_name(client_socket_fd, data)){
+    strncpy(cli->name, &data[strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART) + 1], NAME_LEN);
+    cli->name[strlen(cli->name) - 3] = '\0';
+    if(renvoie_name(cli->socketfd, data)){
       printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_TAG, 3)){
-    if(recois_balises(client_socket_fd, data)){
+    if(recois_balises(cli->socketfd, data)){
       printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_COL, 3)){
-    if(recois_couleurs(client_socket_fd, data)){
+    if(recois_couleurs(cli->socketfd, data)){
       printf("[/!\\] An error occured while sending a message\n");
     }
   }
   else if(!strncmp(code, CODE_CAL, 3)){
-    if(calcul(client_socket_fd, data)){
+    if(calcul(cli->socketfd, data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(!strncmp(code, CODE_MIN, 3)){
-    if(mini(client_socket_fd,data)){
+    if(mini(cli->socketfd,data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(!strncmp(code, CODE_MAX, 3)){
-    if(maxi(client_socket_fd,data)){
+    if(maxi(cli->socketfd,data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(strcmp(data, END_CONN) == 0){
     printf("[-] Client disconnected\n");
-    close(client_socket_fd);
+    close(cli->socketfd);
     return EXIT_END;
   }
   else {
@@ -216,7 +219,7 @@ int recois_envoie_message(int client_socket_fd){
     plot(data);
     memset(data, 0, sizeof(char)*1024);
     create_ok_message(data, "Colors saved");
-    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+    if(write(cli->socketfd, (void *)data, strlen(data)) < 0){
       printf("[/!\\] An error occured while sending a message"); 
     }
   }
@@ -294,14 +297,13 @@ void* manage_client(void* client){
   pthread_mutex_lock(&mutex);
   clients_count++;
   pthread_mutex_unlock(&mutex);
-  int client_fd = ((struct Client*)client)->socketfd;
-  int status = recois_envoie_message(client_fd);
+  int status = recois_envoie_message(client);
     if(status < 0){
       perror("[/!\\] Error during first connection: ");
     }
 
     while (status != EXIT_END){
-      status = recois_envoie_message(client_fd);
+      status = recois_envoie_message(client);
     }
     pthread_mutex_lock(&mutex);
     clients_count--;

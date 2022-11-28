@@ -34,7 +34,14 @@
  * envoyées par le client. En suite, le serveur envoie un message
  * en retour
  */
-int recois_envoie_message(int socketfd);
+
+
+struct Client {
+    int socketfd;
+    char name[NAME_LEN];
+};
+
+int recois_envoie_message(struct Client* cli);
 int recois_balises(int socketfd, char* data);
 int save_in_file(char* tags, const char* file_to_save);
 void plot(char *data);
@@ -44,11 +51,5 @@ void* manage_client(void* client);
 
 #define MAX_CLIENTS 9
 #define EXIT_END -1337
-
-struct Client {
-    int socketfd;
-    char name[30];
-};
-
 
 #endif

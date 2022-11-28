@@ -20,3 +20,4 @@
 #define ARRAY_JSON_PART "\",\"values\":["
 
 #define END_CONN "{\"code\":\"end\",\"values\":[]}"
+#define NAME_LEN 30
