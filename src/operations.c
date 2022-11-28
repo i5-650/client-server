@@ -78,3 +78,117 @@ int calcul(int client_socket_fd, char *data){
 
   return EXIT_SUCCESS;
 }
+
+int mini(int client_socket_fd, char *data){
+  int n;
+  int count=0;
+  int size_tab=0;
+  int tab_int[1024];
+  int smallest_val;
+
+  char *str = data;
+
+  unsigned int start_delimiter = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART);
+  memset(&str[strlen(str) - 2], 0, sizeof(char)*2);
+
+  while (1){
+    char *token = strtok(&str[start_delimiter], ",");
+    if (token == NULL){
+      break;
+    }
+
+    sscanf(token,"\"%d\"",&n);
+
+    if(count==0){
+      size_tab=n;
+    }else{
+      tab_int[count-1]=n;
+    }
+
+
+    smallest_val = tab_int[0];
+
+    for(int i=0;i<size_tab;i++){
+      if(tab_int[i]<smallest_val){
+        smallest_val=tab_int[i];
+      }
+    }
+
+    count++;
+    start_delimiter+=strlen(token)+1;
+  }
+
+  memset(data, 0, sizeof(char)*1024);
+  char int_to_str[10];
+  char buff[1024];
+  sprintf(int_to_str, "%d", smallest_val);
+  strcat(buff,"Smallest value is : ");
+  strcat(buff,int_to_str);
+  printf("%s\n",buff);
+
+  char msg[1024];
+  strcpy(msg,buff);
+
+  create_ok_message(data, msg);
+    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+      printf("[/!\\] An error occured while sending a message");
+    }
+  return EXIT_SUCCESS;
+}
+
+int maxi(int client_socket_fd, char *data){
+  int n;
+  int count=0;
+  int size_tab=0;
+  int tab_int[1024];
+  int biggest_val;
+
+  char *str = data;
+
+  unsigned int start_delimiter = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART);
+  memset(&str[strlen(str) - 2], 0, sizeof(char)*2);
+
+  while (1){
+    char *token = strtok(&str[start_delimiter], ",");
+    if (token == NULL){
+      break;
+    }
+
+    sscanf(token,"\"%d\"",&n);
+
+    if(count==0){
+      size_tab=n;
+    }else{
+      tab_int[count-1]=n;
+    }
+
+
+    biggest_val = tab_int[0];
+
+    for(int i=0;i<size_tab;i++){
+      if(tab_int[i]>biggest_val){
+        biggest_val=tab_int[i];
+      }
+    }
+
+    count++;
+    start_delimiter+=strlen(token)+1;
+  }
+
+  memset(data, 0, sizeof(char)*1024);
+  char int_to_str[10];
+  char buff[1024];
+  sprintf(int_to_str, "%d", biggest_val);
+  strcat(buff,"Biggest value is : ");
+  strcat(buff,int_to_str);
+  printf("%s\n",buff);
+
+  char msg[1024];
+  strcpy(msg,buff);
+
+  create_ok_message(data, msg);
+    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+      printf("[/!\\] An error occured while sending a message");
+    }
+  return EXIT_SUCCESS;
+}
