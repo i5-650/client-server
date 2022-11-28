@@ -17,15 +17,12 @@
 #include <string.h>
 #include <pthread.h>
 #ifdef __APPLE__
-#include <dispatch/dispatch.h>
+  #include <dispatch/dispatch.h>
 #else
-#include <semaphore.h>
+  #include <semaphore.h>
 #endif
 #include "json.h"
 #include "validation.h"
-
-#define MAX_CLIENTS 9
-#define EXIT_END -1337
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 #ifdef __APPLE__
@@ -83,10 +80,11 @@ int main(){
       #else
         sem_wait(&sem);
       #endif
-      int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
+      struct Client client;
+      client.socketfd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
       printf("[+] New client connected !\n");
       pthread_t thread_id;
-      pthread_create(&thread_id, NULL, manage_client, (void *)&client_socket_fd);
+      pthread_create(&thread_id, NULL, manage_client, (void *)&client);
   }
   #ifdef __APPLE__
     dispatch_release(sem);
@@ -282,11 +280,11 @@ int save_in_file(char *tags, const char* file_to_save){
   return EXIT_SUCCESS;
 }
 
-void* manage_client(void* client_socket_fd){
+void* manage_client(void* client){
   pthread_mutex_lock(&mutex);
   clients_count++;
   pthread_mutex_unlock(&mutex);
-  int client_fd = *(int*)client_socket_fd;
+  int client_fd = ((struct Client*)client)->socketfd;
   int status = recois_envoie_message(client_fd);
     if(status < 0){
       perror("[/!\\] Error during first connection: ");

@@ -40,6 +40,15 @@ int save_in_file(char* tags, const char* file_to_save);
 void plot(char *data);
 int renvoie_message(int client_socket_fd, char *data);
 int recois_couleurs(int client_socket_fd, char *data);
-void* manage_client(void* client_socket_fd);
+void* manage_client(void* client);
+
+#define MAX_CLIENTS 9
+#define EXIT_END -1337
+
+struct Client {
+    int socketfd;
+    char name[30];
+};
+
 
 #endif
