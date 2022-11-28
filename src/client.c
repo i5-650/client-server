@@ -23,6 +23,7 @@
 #include "common.h"
 #include "client.h"
 #include "json.h"
+#include "validation.h"
 
 
 int socketfd;
@@ -60,7 +61,7 @@ int main(){
 
 void manage_signal(int sig){
   if(sig == SIGINT){
-    if(write(socketfd, "exit", 4) < 0){
+    if(write(socketfd, END_CONN, strlen(END_CONN)) < 0){
       perror("write");
       exit(EXIT_FAILURE);
     }
@@ -93,10 +94,8 @@ int envoie_recois_calcul(int socketfd){
   memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
-  if(read_status < 0){
-    perror("[/!\\] erreur lecture");
-    return -1;
+  if(read_validated(socketfd, data)){
+    return EXIT_FAILURE;
   }
 
   printf("[+] Message recu: %s\n", data);
@@ -128,10 +127,8 @@ int envoie_recois_message(int socketfd){
   memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
-  if (read_status < 0){
-    perror("[/!\\] erreur lecture");
-    return -1;
+  if(read_validated(socketfd, data)){
+    return EXIT_FAILURE;
   }
 
   printf("[+] Message recu: %s\n", data);
@@ -163,10 +160,8 @@ int envoie_recois_name(int socketfd){
   memset(data, 0, sizeof(char)*DATA_LEN);
 
   // lire les données de la socket
-  int read_status = read(socketfd, data, sizeof(char)*DATA_LEN);
-  if (read_status < 0){
-    perror("[/!\\] erreur lecture");
-    return -1;
+  if(read_validated(socketfd, data)){
+    return EXIT_FAILURE;
   }
 
   return 0;
@@ -219,9 +214,7 @@ int envoie_couleurs(int socketfd){
   }
   memset(data, 0, sizeof(char)*DATA_LEN);
 
-  status = read(socketfd, data, sizeof(char)*DATA_LEN);
-  if(status < 0){
-    perror("[/!\\] Error receiving server response");
+  if(read_validated(socketfd, data)){
     return EXIT_FAILURE;
   }
 
@@ -270,8 +263,7 @@ int envoie_balise(int socketfd){
 
   memset(data, 0, sizeof(char)*DATA_LEN);
 
-  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
-    perror("[/!\\] Error receiving message");
+  if(read_validated(socketfd, data)){
     return EXIT_FAILURE;
   }
 
@@ -325,8 +317,7 @@ int envoie_couleurs_table(int socketfd){
 
   memset(data, 0, sizeof(char)*DATA_LEN);
 
-  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
-    perror("[/!\\] Error receiving message");
+  if(read_validated(socketfd, data)){
     return EXIT_FAILURE;
   }
 
@@ -383,4 +374,18 @@ int command_builder(int socketfd){
   }
 
   return 1;
+}
+
+int read_validated(int socketfd, char *data){
+  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
+    perror("[/!\\] Error receiving message");
+    return EXIT_FAILURE;
+  }
+
+  if(validate_json(data)){
+    printf("[/!\\] Invalid JSON received\n");
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }

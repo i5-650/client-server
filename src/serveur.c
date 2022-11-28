@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "json.h"
+#include "validation.h"
 
 int main(){
   int socketfd;
@@ -112,22 +113,15 @@ int renvoie_message(int client_socket_fd, char *data){
 
   if (data_size < 0){
     perror("[/!\\] erreur ecriture");
-    return (EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
-  return (EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 }
 
 int renvoie_name(int client_socket_fd, char *data){
-  printf("[+] Sending back: %s \n", data);
-  int data_size = write(client_socket_fd, (void *)data, strlen(data));
-
-  if (data_size < 0){
-    perror("[/!\\] erreur ecriture");
-    return (EXIT_FAILURE);
-  }
-
-  return (EXIT_SUCCESS);
+  int status = renvoie_message(client_socket_fd, data);
+  return status;
 }
 
 /* accepter la nouvelle connection d'un client et lire les données
@@ -141,6 +135,11 @@ int recois_envoie_message(int client_socket_fd){
   int data_size = read(client_socket_fd, (void *)data, sizeof(char)*DATA_LEN);
   if (data_size < 0){
     perror("erreur lecture");
+    return EXIT_FAILURE;
+  }
+
+  if(validate_json(data)){
+    perror("[/!\\] Invalid JSON");
     return EXIT_FAILURE;
   }
 
@@ -172,7 +171,7 @@ int recois_envoie_message(int client_socket_fd){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
-  else if(strcmp(data, "exit") == 0){
+  else if(strcmp(data, END_CONN) == 0){
     printf("[-] Client disconnected\n");
     close(client_socket_fd);
     exit(EXIT_SUCCESS);
@@ -207,6 +206,7 @@ int recois_couleurs(int client_socket_fd, char *data){
   fprintf(fptr, "%s", data);
   fclose(fptr);
 
+  create_ok_message(data, "Colors saved");
   int data_size = write(client_socket_fd, (void *)data, strlen(data));
 
   if (data_size < 0){
@@ -215,7 +215,6 @@ int recois_couleurs(int client_socket_fd, char *data){
   }
 
   memset(data, 0, sizeof(char)*DATA_LEN);
-  create_ok_message(data, "Colors saved");
 
   return EXIT_SUCCESS;
 }

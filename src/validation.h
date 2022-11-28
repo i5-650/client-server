@@ -15,6 +15,9 @@
 #ifndef __VALIDATION_H__
 #define __VALIDATION_H__
 
+#define INVALID_JSON_MSG "{\"code\":\"err\",\"values\":[\"Invalid JSON\"]}"
+
+
 int validate_json(char* data);
 
 #endif // __VALIDATION_H__

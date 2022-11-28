@@ -40,5 +40,6 @@ int save_in_file(char* tags, const char* file_to_save);
 void plot(char *data);
 int renvoie_message(int client_socket_fd, char *data);
 int recois_couleurs(int client_socket_fd, char *data);
+int manage_message(int client_socket_fd, char *data);
 
 #endif

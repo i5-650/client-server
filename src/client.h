@@ -34,5 +34,6 @@ int envoie_recois_name(int socketfd);
 void analyse(char *pathname, char *data);
 int envoie_couleurs(int socketfd);
 int envoie_couleurs_table(int socketfd);
+int read_validated(int socketfd, char *data);
 
 #endif
