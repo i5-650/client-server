@@ -15,9 +15,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <pthread.h>
+#ifdef __APPLE__
+#include <dispatch/dispatch.h>
+#else
+#include <semaphore.h>
+#endif
 #include "json.h"
 #include "validation.h"
+
+#define MAX_CLIENTS 9
+#define EXIT_END -1337
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#ifdef __APPLE__
+  dispatch_semaphore_t sem;
+#else
+  sem_t sem;
+#endif
+
+int clients_count = 0;
 
 int main(){
   int socketfd;
@@ -54,18 +71,28 @@ int main(){
   struct sockaddr_in client_addr;
 
   unsigned int client_addr_len = sizeof(client_addr);
-
-  // nouvelle connection de client
-  int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
-  printf("[+] New client connected !\n");
+  #ifdef __APPLE__
+    sem = dispatch_semaphore_create(MAX_CLIENTS);
+  #else
+    sem_init(&sem, 0, MAX_CLIENTS);
+  #endif
   
-  if(recois_envoie_message(client_socket_fd) < 0){
-    perror("[/!\\] Error during first connection: ");
+  while(1){
+      #ifdef __APPLE__
+        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+      #else
+        sem_wait(&sem);
+      #endif
+      int client_socket_fd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
+      printf("[+] New client connected !\n");
+      pthread_t thread_id;
+      pthread_create(&thread_id, NULL, manage_client, (void *)&client_socket_fd);
   }
-
-  while (1){
-    recois_envoie_message(client_socket_fd);
-  }
+  #ifdef __APPLE__
+    dispatch_release(sem);
+  #else
+    sem_destroy(&sem);
+  #endif
 
   return 0;
 }
@@ -174,7 +201,7 @@ int recois_envoie_message(int client_socket_fd){
   else if(strcmp(data, END_CONN) == 0){
     printf("[-] Client disconnected\n");
     close(client_socket_fd);
-    exit(EXIT_SUCCESS);
+    return EXIT_END;
   }
   else {
     save_in_file(data, COLORS_DATABASE);
@@ -236,6 +263,7 @@ int recois_balises(int socketfd, char *data){
 }
 
 int save_in_file(char *tags, const char* file_to_save){
+  pthread_mutex_lock(&mutex);
 
   FILE *fd = fopen(file_to_save, "a");
   
@@ -250,5 +278,31 @@ int save_in_file(char *tags, const char* file_to_save){
   }
 
   fclose(fd);
+  pthread_mutex_unlock(&mutex);
   return EXIT_SUCCESS;
+}
+
+void* manage_client(void* client_socket_fd){
+  pthread_mutex_lock(&mutex);
+  clients_count++;
+  pthread_mutex_unlock(&mutex);
+  int client_fd = *(int*)client_socket_fd;
+  int status = recois_envoie_message(client_fd);
+    if(status < 0){
+      perror("[/!\\] Error during first connection: ");
+    }
+
+    while (status != EXIT_END){
+      status = recois_envoie_message(client_fd);
+    }
+    pthread_mutex_lock(&mutex);
+    clients_count--;
+    pthread_mutex_unlock(&mutex);
+    #ifdef __APPLE__
+      dispatch_semaphore_signal(sem);
+    #else
+      sem_post(&sem);
+    #endif
+    pthread_exit(NULL);
+    return NULL;
 }

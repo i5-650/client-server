@@ -5,7 +5,7 @@ CLIENT_OBJS ?= client.o bmp.o couleur.o json.o validation.o
 SERVER_OBJS ?= serveur.o operations.o json.o validation.o
 
 # Avertissements
-CFLAGS ?= -Wall -Wextra
+CFLAGS ?= -Wall -Wextra -pthread
 
 # Déboggage
 DEBUG ?= -ggdb3
