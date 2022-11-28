@@ -60,7 +60,7 @@ int validate_json(char* data){
 
     // check array content
     start_index+=strlen(ARRAY_JSON_PART);
-    printf("%s\n", &data[start_index]);
+    //printf("%s\n", &data[start_index]);
     if(check_array_content(&data[start_index])){
         return EXIT_FAILURE;
     }

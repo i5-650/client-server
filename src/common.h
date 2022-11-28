@@ -8,6 +8,10 @@
 #define CODE_ERR "err"
 #define CODE_OKK "okk"
 #define CODE_ANL "anl"
+#define CODE_MIN "min"
+#define CODE_MAX "max"
+#define CODE_AVG "avg"
+#define CODE_ECT "ect"
 
 #define CODE_LEN 3
 #define DATA_LEN 1024

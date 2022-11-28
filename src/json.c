@@ -113,6 +113,7 @@ void create_ok_message(char* data, const char* okk_message){
     strcat(data, "\"]}");
 }
 
+
 void prepare_message(char* data, const char code[3]){
     strcpy(data, FIRST_JSON_PART);
     strcat(data, code);

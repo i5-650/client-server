@@ -171,6 +171,16 @@ int recois_envoie_message(int client_socket_fd){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
+  else if(!strncmp(code, CODE_MIN, 3)){
+    if(mini(client_socket_fd,data)){
+      printf("[/!\\] An error occured while sending a messages\n");
+    }
+  }
+  else if(!strncmp(code, CODE_MAX, 3)){
+    if(maxi(client_socket_fd,data)){
+      printf("[/!\\] An error occured while sending a messages\n");
+    }
+  }
   else if(strcmp(data, END_CONN) == 0){
     printf("[-] Client disconnected\n");
     close(client_socket_fd);
