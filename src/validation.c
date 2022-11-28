@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int check_array_content(char* data){
     int quote = 0;
     for(size_t i = 0; i < strlen(data) - 2; i++){

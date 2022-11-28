@@ -14,3 +14,5 @@
 
 #define FIRST_JSON_PART "{\"code\":\""
 #define ARRAY_JSON_PART "\",\"values\":["
+
+#define END_CONN "{\"code\":\"end\",\"values\":[]}"

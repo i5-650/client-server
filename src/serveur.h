@@ -18,6 +18,7 @@
 
 #define NOT_MY_GOAL -1337
 #define TAGS_DATABASE "tags_database.txt"
+#define COLORS_DATABASE "colors_database.txt"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,9 +36,10 @@
  */
 int recois_envoie_message(int socketfd);
 int recois_balises(int socketfd, char* data);
-int save_tags(char* tags);
+int save_in_file(char* tags, const char* file_to_save);
 void plot(char *data);
 int renvoie_message(int client_socket_fd, char *data);
 int recois_couleurs(int client_socket_fd, char *data);
+int manage_message(int client_socket_fd, char *data);
 
 #endif
