@@ -244,3 +244,67 @@ int avg(int client_socket_fd, char* data){
     memset(tempon, 0, sizeof(char)*1024);
   return EXIT_SUCCESS;
 }
+
+int ecart(int client_socket_fd,char* data){
+  float sum = 0.0;
+  float avg = 0.0;
+
+  int n;
+  int count=0;
+  int num_of_int;
+  int number_list[1024];
+
+  float res = 0.0;
+
+
+  char* str = data;
+  char temp[1024];
+  char tempon[1024];
+
+  unsigned int start_delimiter = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART);
+  memset(&str[strlen(str) - 2], 0, sizeof(char)*2);
+
+  while (1){
+    char *token = strtok(&str[start_delimiter], ",");
+    if (token == NULL){
+      break;
+    }
+
+    sscanf(token,"\"%d\"",&n);
+
+    if(count == 0){
+      num_of_int = n;
+    }else{
+      number_list[count-1] = n;
+    }
+    count++;
+    start_delimiter+=strlen(token)+1;
+  }
+  for (int j = 0; j < num_of_int; j++)
+    {
+      sum += number_list[j];
+    }
+  avg = sum / num_of_int;
+  sum = 0.0;
+  for (int j = 0; j < num_of_int; j++)
+    {
+      sum += pow(number_list[j] - avg, 2);
+    }
+  res = sqrt(sum / num_of_int);
+
+  printf("Ecarts type : %f\n",res);
+
+  sprintf(temp, "%f", res);
+  strcat(tempon,"Ecarts type : ");
+  strcat(tempon,temp);
+
+  char msg[1024];
+  strcpy(msg,tempon);
+
+  create_ok_message(data, msg);
+    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+      printf("[/!\\] An error occured while sending a message");
+    }
+    memset(tempon, 0, sizeof(char)*1024);
+  return EXIT_SUCCESS;
+}
