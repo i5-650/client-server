@@ -396,6 +396,122 @@ int envoie_num_max(int socketfd){
   return EXIT_SUCCESS;
 }
 
+int envoie_num_moy(int socketfd){
+    char data[1024];
+  char input[30];
+  int number_count = 0;
+  
+  //Récupération du nombre de nombres
+  printf("[+] How many nomber are you sending ? (limited to 30) ");
+  fgets(input, sizeof(char)*30, stdin);
+  remove_last_newline(input);
+
+  prepare_message(data, CODE_AVG);
+
+  if(sscanf(input, "%d", &number_count)<1){
+    printf("[/!\\] Invalid size of list\n");
+    return EXIT_FAILURE;
+  }
+  
+  if(number_count <= 0 || number_count > 30){
+    printf("[/!\\] Invalid size of list\n");
+    return EXIT_FAILURE;
+  }
+
+  add_first_element(data, input);
+  memset(input, 0, sizeof(input));
+
+  for(int i = 0; i < number_count; i++){
+    printf("[+] Enter a number : ");
+    fgets(input, sizeof(char)*30, stdin);
+    remove_last_newline(input);
+    add_element(data, input);
+    memset(input, 0, sizeof(char)*30);
+  }
+
+  strcat(data, "]}");
+
+  if(write(socketfd, (void *)data, strlen(data)) < 0){
+    perror("[/!\\] Error sending message");
+    return EXIT_FAILURE;
+  }
+
+  memset(data, 0, sizeof(char)*DATA_LEN);
+
+  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
+    perror("[/!\\] Error receiving message");
+    return EXIT_FAILURE;
+  }
+
+  if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
+    perror("[/!\\] An error occured on the server");
+    return EXIT_FAILURE;
+  }
+
+  printf("[+] Messages received %s\n",data);
+
+  printf("[+] Messages received and saved\n");
+  return EXIT_SUCCESS;
+}
+
+int envoie_num_ect(int socketfd){
+  char data[1024];
+  char input[30];
+  int number_count = 0;
+  
+  //Récupération du nombre de nombres
+  printf("[+] How many nomber are you sending ? (limited to 30) ");
+  fgets(input, sizeof(char)*30, stdin);
+  remove_last_newline(input);
+
+  prepare_message(data, CODE_ECT);
+
+  if(sscanf(input, "%d", &number_count)<1){
+    printf("[/!\\] Invalid size of list\n");
+    return EXIT_FAILURE;
+  }
+  
+  if(number_count <= 0 || number_count > 30){
+    printf("[/!\\] Invalid size of list\n");
+    return EXIT_FAILURE;
+  }
+
+  add_first_element(data, input);
+  memset(input, 0, sizeof(input));
+
+  for(int i = 0; i < number_count; i++){
+    printf("[+] Enter a number : ");
+    fgets(input, sizeof(char)*30, stdin);
+    remove_last_newline(input);
+    add_element(data, input);
+    memset(input, 0, sizeof(char)*30);
+  }
+
+  strcat(data, "]}");
+
+  if(write(socketfd, (void *)data, strlen(data)) < 0){
+    perror("[/!\\] Error sending message");
+    return EXIT_FAILURE;
+  }
+
+  memset(data, 0, sizeof(char)*DATA_LEN);
+
+  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
+    perror("[/!\\] Error receiving message");
+    return EXIT_FAILURE;
+  }
+
+  if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
+    perror("[/!\\] An error occured on the server");
+    return EXIT_FAILURE;
+  }
+
+  printf("[+] Messages received %s\n",data);
+
+  printf("[+] Messages received and saved\n");
+  return EXIT_SUCCESS;
+}
+
 int envoie_couleurs_table(int socketfd){
  char data[1024];
   char input[30];
@@ -501,6 +617,18 @@ int command_builder(int socketfd){
   else if(strcmp(command, "MAX\n") == 0){
     printf("[+] Mode minimum activé : \n");
     if(envoie_num_max(socketfd)){
+      printf("[/!\\] Error occured during minimum sending\n");
+    }
+  }
+  else if(strcmp(command,"AVG\n") == 0){
+    printf("[+] Mode moyenne activé : \n");
+    if(envoie_num_moy(socketfd)){
+      printf("[/!\\] Error occured during minimum sending\n");
+    }
+  }
+  else if(strcmp(command, "ECT\n") == 0){
+    printf("[+] Mode écart type activé : \n");
+    if(envoie_num_ect(socketfd)){
       printf("[/!\\] Error occured during minimum sending\n");
     }
   }

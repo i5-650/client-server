@@ -219,6 +219,16 @@ int recois_envoie_message(struct Client* cli){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
+  else if (!strncmp(code, CODE_AVG, 3)){
+    if(avg(cli->socketfd, data)){
+      printf("[/!\\] An error occured while sending a messages\n");
+    }
+  }
+  else if (!strncmp(code, CODE_ECT, 3)){
+    if(ecart(cli->socketfd, data)){
+      printf("[/!\\] An error occured while sending a messages\n");
+    }
+  }
   else if(strcmp(data, END_CONN) == 0){
     printf("[-] Client disconnected\n");
     close(cli->socketfd);

@@ -19,11 +19,11 @@ all: $(SERVER) $(CLIENT)
 
 # Création d'un exécutable pour le côté serveur
 $(SERVER): $(SERVER_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER).out $(SERVER_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER).out $(SERVER_OBJS) -lm
 
 # Création d'un exécutable pour le côté client
 $(CLIENT): $(CLIENT_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS) -lm
 
 # Compilation du code sans création d'un exécutable
 .c.o: 
