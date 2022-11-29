@@ -449,8 +449,6 @@ int envoie_num_moy(int socketfd){
   }
 
   printf("[+] Messages received %s\n",data);
-
-  printf("[+] Messages received and saved\n");
   return EXIT_SUCCESS;
 }
 
