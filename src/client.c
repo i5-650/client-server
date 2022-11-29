@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <signal.h>
+#include <arpa/inet.h>
 
 #include "common.h"
 #include "client.h"
@@ -28,7 +29,7 @@
 
 int socketfd;
 
-int main(){
+int main(int argc, char *argv[]){
   signal(SIGINT, manage_signal);
 
   struct sockaddr_in server_addr;
@@ -43,7 +44,10 @@ int main(){
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(PORT);
-  server_addr.sin_addr.s_addr = INADDR_ANY;
+
+  if(argc != 2 || !inet_aton(argv[1], &server_addr.sin_addr)){
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+  }
 
   // demande de connection au serveur
   int connect_status = connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
