@@ -66,7 +66,7 @@ int calcul(int client_socket_fd, char *data){
         create_error_message(data, "Internal server error");
       }
       else {
-        set_message(tmp, data);
+        create_ok_message(data, tmp);
       }
   }
   free(c);
@@ -119,20 +119,19 @@ int mini(int client_socket_fd, char *data){
   }
 
   memset(data, 0, sizeof(char)*1024);
+
   char int_to_str[10];
-  char buff[1024];
-  sprintf(int_to_str, "%d", smallest_val);
-  strcat(buff,"Smallest value is : ");
-  strcat(buff,int_to_str);
-  printf("%s\n",buff);
+  if(sprintf(int_to_str, "%d", smallest_val) < 0){
+    create_error_message(data, "couldn't parse min value");
+  }
+  else {
+    create_ok_message(data, int_to_str);
+  }
 
-  char msg[1024];
-  strcpy(msg,buff);
-
-  create_ok_message(data, msg);
-    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-      printf("[/!\\] An error occured while sending a message");
-    }
+  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+    printf("[/!\\] An error occured while sending a message");
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }
 
@@ -177,18 +176,16 @@ int maxi(int client_socket_fd, char *data){
 
   memset(data, 0, sizeof(char)*1024);
   char int_to_str[10];
-  char buff[1024];
-  sprintf(int_to_str, "%d", biggest_val);
-  strcat(buff,"Biggest value is : ");
-  strcat(buff,int_to_str);
-  printf("%s\n",buff);
+  if(sprintf(int_to_str, "%d", biggest_val) < 0){
+    create_error_message(data, "couldn't parse max value");
+  }
+  else {
+    create_ok_message(data, int_to_str);
+  }
 
-  char msg[1024];
-  strcpy(msg,buff);
-
-  create_ok_message(data, msg);
-    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-      printf("[/!\\] An error occured while sending a message");
-    }
+  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
+    printf("[/!\\] An error occured while sending a message");
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }

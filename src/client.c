@@ -336,8 +336,7 @@ int envoie_num_min(int socketfd){
   }
 
   printf("[+] Messages received %s\n",data);
-
-  printf("[+] Messages received and saved\n");
+  
   return EXIT_SUCCESS;
 }
 
@@ -394,8 +393,6 @@ int envoie_num_max(int socketfd){
   }
 
   printf("[+] Messages received %s\n",data);
-
-  printf("[+] Messages received and saved\n");
   return EXIT_SUCCESS;
 }
 
