@@ -80,11 +80,11 @@ int main(){
       #else
         sem_wait(&sem);
       #endif
-      struct Client client;
-      client.socketfd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
+      struct Client* client = (struct Client*) malloc(sizeof(struct Client));
+      client->socketfd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
       printf("[+] New client connected !\n");
       pthread_t thread_id;
-      pthread_create(&thread_id, NULL, manage_client, (void *)&client);
+      pthread_create(&thread_id, NULL, manage_client, (void *)client);
   }
   #ifdef __APPLE__
     dispatch_release(sem);
@@ -162,6 +162,11 @@ int recois_envoie_message(struct Client* cli){
   if (data_size < 0){
     perror("erreur lecture");
     return EXIT_FAILURE;
+  }
+
+  if(!data_size){
+    printf("[+] Client disappeared\n");
+    return EXIT_END;
   }
 
   if(validate_json(data)){
@@ -294,9 +299,6 @@ int save_in_file(char *tags, const char* file_to_save){
 }
 
 void* manage_client(void* client){
-  pthread_mutex_lock(&mutex);
-  clients_count++;
-  pthread_mutex_unlock(&mutex);
   int status = recois_envoie_message(client);
     if(status < 0){
       perror("[/!\\] Error during first connection: ");
@@ -305,14 +307,12 @@ void* manage_client(void* client){
     while (status != EXIT_END){
       status = recois_envoie_message(client);
     }
-    pthread_mutex_lock(&mutex);
-    clients_count--;
-    pthread_mutex_unlock(&mutex);
     #ifdef __APPLE__
       dispatch_semaphore_signal(sem);
     #else
       sem_post(&sem);
     #endif
+    free(client);
     pthread_exit(NULL);
     return NULL;
 }
