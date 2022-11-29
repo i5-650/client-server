@@ -33,10 +33,15 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int clients_count = 0;
 
-int main(){
+int main(int argc, char *argv[]){
   int socketfd;
   int bind_status;
   struct sockaddr_in server_addr;
+  unsigned short max_client = MAX_CLIENTS;
+  if(argc == 2 && sscanf(argv[1], "%hu", &max_client) < 1){
+    printf("Usage: ./serveur <max_clients>");
+    return EXIT_FAILURE;
+  }
 
   //Creation d'une socket
   socketfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,7 +74,7 @@ int main(){
 
   unsigned int client_addr_len = sizeof(client_addr);
   #ifdef __APPLE__
-    sem = dispatch_semaphore_create(MAX_CLIENTS);
+    sem = dispatch_semaphore_create(max_client);
   #else
     sem_init(&sem, 0, MAX_CLIENTS);
   #endif
