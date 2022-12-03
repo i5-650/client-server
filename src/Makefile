@@ -3,6 +3,7 @@ CC ?= gcc
 # Modifiez les deux lignes suivantes et ajoutez de nouveaux fichiers selon vos besoins
 CLIENT_OBJS ?= client.o bmp.o couleur.o json.o validation.o
 SERVER_OBJS ?= serveur.o operations.o json.o validation.o
+TESTES_OBJS ?= testes.o operations.o json.o validation.o
 
 # Avertissements
 CFLAGS ?= -Wall -Wextra -pthread -g
@@ -14,8 +15,9 @@ DEBUG ?= -ggdb3
 
 SERVER = serveur
 CLIENT = client
+TESTES = testes
 
-all: $(SERVER) $(CLIENT)
+all: $(SERVER) $(CLIENT) $(TESTES)
 
 # Création d'un exécutable pour le côté serveur
 $(SERVER): $(SERVER_OBJS)
@@ -25,6 +27,9 @@ $(SERVER): $(SERVER_OBJS)
 $(CLIENT): $(CLIENT_OBJS)
 	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS) -lm
 
+$(TESTES): $(TESTES_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -o $(TESTES).out $(TESTES_OBJS) -lm
+
 # Compilation du code sans création d'un exécutable
 .c.o: 
 	$(CC) $(DEBUG) $(CFLAGS) -c $*.c
@@ -32,3 +37,5 @@ $(CLIENT): $(CLIENT_OBJS)
 clean: 
 	rm -rf *.o *.out *.txt
 
+tests:
+	./testes.out
