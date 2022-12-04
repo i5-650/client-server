@@ -15,8 +15,10 @@
 #ifndef __VALIDATION_H__
 #define __VALIDATION_H__
 
-#define INVALID_JSON_MSG "{\"code\":\"err\",\"values\":[\"Invalid JSON\"]}"
+#define INVALID_JSON_MSG "{\"code\":\"err\",\"values\":[\"Server couldn't use the JSON sent\"]}"
+#define NOT_JSON "{\"code\":\"err\",\"values\":[\"The message sent isn't JSON\"]}"
 
+int json_validator(const char *data);
 
 int validate_json(char* data);
 

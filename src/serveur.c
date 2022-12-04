@@ -174,9 +174,11 @@ int recois_envoie_message(struct Client* cli){
     return EXIT_END;
   }
 
-  if(validate_json(data)){
-    perror("[/!\\] Invalid JSON");
-    return EXIT_FAILURE;
+  if(read_validated(data)){
+    if(write(cli->socketfd, (void *)data, strlen(data)) < 0){
+      perror("[/!\\] Error sending message");
+      return EXIT_FAILURE;
+    }
   }
 
   printf("[%s] Données recus: %s\n",cli->name, data);
@@ -330,4 +332,18 @@ void* manage_client(void* client){
     free(client);
     pthread_exit(NULL);
     return NULL;
+}
+
+int read_validated(char *data){
+  if(!json_validator(data)){
+    printf("[/!\\] Invalid JSON received\n");
+    return EXIT_FAILURE;
+  }
+
+  if(validate_json(data)){
+    printf("[/!\\] Unparsable JSON received\n");
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
