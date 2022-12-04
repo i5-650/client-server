@@ -21,11 +21,11 @@
 
 
 int main(){
-    ASSERT_EQ_CHAR('A', 'B');
-    ASSERT_EQ_CODE(CODE_MSG, "lol");
-    ASSERT_EQ_STR("lol", "olo");
-    ASSERT_EQ_INT(1, 2);
-    ASSERT_EQ_FLOAT(1.0, 2.0);
+    char *data = "{\"code\": 1, \"data\": [1, 2, 3, 4, 5]}";
+    char *invalid_json = "{\"code\": 1, \"data\": [1, 2, 3, 4, 5";
+    ASSERT_EQ_INT(1, json_validator(data));
+    ASSERT_EQ_INT(1, json_validator(INVALID_JSON_MSG));
+    ASSERT_EQ_INT(0, json_validator(invalid_json));
     return 0;
 }
 

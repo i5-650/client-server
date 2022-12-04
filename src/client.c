@@ -640,8 +640,13 @@ int read_validated(int socketfd, char *data){
     return EXIT_FAILURE;
   }
 
-  if(validate_json(data)){
+  if(!json_validator(data)){
     printf("[/!\\] Invalid JSON received\n");
+    return EXIT_FAILURE;
+  }
+
+  if(validate_json(data)){
+    printf("[/!\\] Unparsable JSON received\n");
     return EXIT_FAILURE;
   }
 

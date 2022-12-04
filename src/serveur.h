@@ -48,6 +48,7 @@ void plot(char *data);
 int renvoie_message(int client_socket_fd, char *data);
 int recois_couleurs(int client_socket_fd, char *data);
 void* manage_client(void* client);
+int read_validated(char *data);
 
 #define MAX_CLIENTS 9
 #define EXIT_END -1337
