@@ -15,29 +15,16 @@
 #include <stdlib.h>
 
  char* get_code(char* data){
-    char *code = malloc(sizeof(char) * 3);
+    static char code[3] = {0};
     strncpy(code, &data[strlen(FIRST_JSON_PART)], 3);
     return code;
  }
 
-char* get_word_till_quote(char* data){
-    unsigned int end_index = 0;
-    for(size_t i = 0; i < strlen(data); ++i){
-        if(data[i] == '"'){
-            end_index = i;
-            break;
-        }
-    }
-    data[end_index + 1] = '\0';
-    free(&data[end_index + 2]);
-    return data;
-}
-
 int get_calcul(char* data, struct Calc *to_calc){
     unsigned int start_index = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART) + 1;
     to_calc->operation = data[start_index];
-    start_index+=4;
-    if(sscanf(&data[start_index], "%f\",\"%f", &to_calc->nums[0], &to_calc->nums[1]) == EOF){
+    start_index+=3;
+    if(sscanf(&data[start_index], "%f,%f", &to_calc->nums[0], &to_calc->nums[1]) < 0){
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -75,7 +62,7 @@ int set_calcul(char* calc, char* data){
     prepare_message(data, CODE_CAL);
     strcat(data, "\"");
     strncat(data, calc, 1);
-    strcat(data, "\",\"");
+    strcat(data, "\",");
     float nums[2];
     if(sscanf(&calc[1], "%f %f", &nums[0], &nums[1]) == EOF){
         printf("error parsing floats\n");
@@ -87,21 +74,21 @@ int set_calcul(char* calc, char* data){
     }
 
     strcat(data, calc);
-    strcat(data, "\",\"");
+    strcat(data, ",");
 
     if(sprintf(calc, "%.2f", nums[1]) == EOF){
         return EXIT_FAILURE;
     }
 
     strcat(data, calc);
-    strcat(data, "\"]}");
+    strcat(data, "]}");
 
     return EXIT_SUCCESS;
 }
 
 void create_error_message(char* data, const char* erreur_messsage){
     prepare_message(data, CODE_ERR);
-    strcat(data, "error: \"");
+    strcat(data, "\"error: ");
     strcat(data, erreur_messsage);
     strcat(data, "\"]}");
 }
@@ -111,6 +98,12 @@ void create_ok_message(char* data, const char* okk_message){
     strcat(data, "\"");
     strcat(data, okk_message);
     strcat(data, "\"]}");
+}
+
+void create_ok_message_int(char* data, const char* okk_message){
+    prepare_message(data, CODE_OKK);
+    strcat(data, okk_message);
+    strcat(data, "]}");
 }
 
 
@@ -126,10 +119,13 @@ void add_element(char* data, const char* elem){
     strcat(data, "\"");
 }
 
+void add_number_element(char* data, const char* elem){
+    strcat(data, ",");
+    strcat(data, elem);
+}
+
 void add_first_element(char* data, const char* element){
-    strcat(data, "\"");
     strcat(data, element);
-    strcat(data, "\"");
 }
 
 void remove_last_newline(char* data){

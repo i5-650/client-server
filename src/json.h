@@ -26,8 +26,10 @@ int set_calcul(char* calc, char* data);
 
 void create_error_message(char* data, const char* erreur_messsage);
 void create_ok_message(char* data, const char* okk_message);
+void create_ok_message_int(char* data, const char* okk_message);
 void prepare_message(char* data, const char code[3]);
 void add_element(char* data, const char* element);
 void add_first_element(char* data, const char* element);
+void add_number_element(char* data, const char* elem);
 
 #endif // __JSON_H__

@@ -14,11 +14,86 @@ Client-server project for school
 - Clients and Server communicate with JSON messages. 
 
 ## The JSON messages
-The JSON messages are following a specific format.
+The JSON messages are following a specific format for not single textual informations.
 ```JSON
 {
-    "code": "MSG", // the code is always on exactly 3 characters 
-    "values": ["10", "5", "2"] // the values are always in an array and every thing is a string, always. Because is an array of string.
+    "code": "msg", // the code is always on exactly 3 characters without capital letters
+    "values": [3, 1, 2, 3] // the values are always in an array. The first value MUST be the number of values that will be sent. The only exception is the 'cal' code. 
+}
+```
+If the message is a single text information, the `value` array will only contain one value: the string sent/received.
+### Examples
+```JSON
+{
+    "code": "okk",
+    "values": ["Something saying everything is okay"]
+}
+```
+```JSON
+{
+    "code": "err",
+    "values": ["Something saying everything what happened"]
+}
+```
+```JSON
+{
+    "code": "msg",
+    "values": ["Hello World"]
+}
+```
+```JSON
+{
+    "code": "nam",
+    "values": ["hostname"]
+}
+```
+```JSON
+{
+    "code": "col",
+    "values": [4, "0xffffff", "0xffffff", "0xffffff", "0xffffff"]
+}
+```
+```JSON
+{
+    "code": "anl",
+    "values": [4, "0xffffff", "0xffffff", "0xffffff", "0xffffff"]
+}
+```
+```JSON
+{
+    "code": "min",
+    "values": [4, 10, 11, 12, 13]
+}
+```
+```JSON
+{
+    "code": "max",
+    "values": [4, 10, 11, 12, 13]
+}
+```
+```JSON
+{
+    "code": "avg",
+    "values": [4, 10, 11, 12, 13]
+}
+```
+```JSON
+{
+    "code": "ect",
+    "values": [4, 10, 11, 12, 13]
+}
+```
+```JSON
+{
+    "code": "tag",
+    "values": [3, "tag1", "tag2", "tag3"]
+}
+```
+### The exception
+```JSON
+{
+    "code": "CAL",
+    "values": ["+", 2.14, 3] // the first value is the operator. The second and third values are the numbers to operate on.
 }
 ```
 

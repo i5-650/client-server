@@ -40,15 +40,15 @@ int calculator(struct Calc *c, float* output){
 
 int calcul(int client_socket_fd, char *data){
   float result = 0.0;
-  struct Calc *c = malloc(sizeof(struct Calc));
-  c->operation = '%';
-  c->nums[0] = 0.0;
-  c->nums[1] = 0.0;
-  if(get_calcul(data, c)){
+  struct Calc c;
+  c.operation = '%';
+  c.nums[0] = 0.0;
+  c.nums[1] = 0.0;
+  if(get_calcul(data, &c)){
     create_error_message(data, "parsing input");
   }
 
-  int status = calculator(c, &result);
+  int status = calculator(&c, &result);
   char tmp[20];
 
   switch(status){
@@ -70,7 +70,6 @@ int calcul(int client_socket_fd, char *data){
         create_ok_message(data, tmp);
       }
   }
-  free(c);
 
   if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
     perror("error sending datas");
@@ -87,7 +86,8 @@ int mini(int client_socket_fd, char *data){
   int tab_int[1024];
   int smallest_val;
 
-  char *str = data;
+  char str[1024] = "";
+  memcpy(str, data, 1024);
 
   unsigned int start_delimiter = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART);
   memset(&str[strlen(str) - 2], 0, sizeof(char)*2);
@@ -98,7 +98,7 @@ int mini(int client_socket_fd, char *data){
       break;
     }
 
-    if(sscanf(token,"\"%d\"",&n) < 1){
+    if(sscanf(token,"%d",&n) < 1){
       break;
     }
 
@@ -128,7 +128,7 @@ int mini(int client_socket_fd, char *data){
     create_error_message(data, "couldn't parse min value");
   }
   else {
-    create_ok_message(data, int_to_str);
+    create_ok_message_int(data, int_to_str);
   }
 
   if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
@@ -156,7 +156,7 @@ int maxi(int client_socket_fd, char *data){
       break;
     }
 
-    if(sscanf(token,"\"%d\"",&n) < 1){
+    if(sscanf(token,"%d",&n) < 1){
       break;
     }
 
@@ -214,7 +214,7 @@ int avg(int client_socket_fd, char* data){
       break;
     }
 
-    if(sscanf(token,"\"%d\"",&n) < 1){
+    if(sscanf(token,"%d",&n) < 1){
       break;
     }
 
@@ -276,7 +276,7 @@ int ecart(int client_socket_fd,char* data){
       break;
     }
 
-    if(sscanf(token,"\"%d\"",&n) < 1){
+    if(sscanf(token,"%d",&n) < 1){
       break;
     }
 

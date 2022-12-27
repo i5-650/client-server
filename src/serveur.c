@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
       #else
         sem_wait(&sem);
       #endif
-      struct Client* client = (struct Client*) malloc(sizeof(struct Client));
+      struct Client* client = malloc(sizeof(struct Client));
       client->socketfd = accept(socketfd, (struct sockaddr *)&client_addr, &client_addr_len);
       printf("[+] New client connected !\n");
       pthread_t thread_id;
@@ -175,6 +175,7 @@ int recois_envoie_message(struct Client* cli){
   }
 
   if(read_validated(data)){
+    create_error_message(data, "couldn't parse data");
     if(write(cli->socketfd, (void *)data, strlen(data)) < 0){
       perror("[/!\\] Error sending message");
       return EXIT_FAILURE;
@@ -245,7 +246,6 @@ int recois_envoie_message(struct Client* cli){
       printf("[/!\\] An error occured while sending a message"); 
     }
   }
-  free(code);
   return EXIT_SUCCESS;
 }
 
@@ -339,11 +339,5 @@ int read_validated(char *data){
     printf("[/!\\] Invalid JSON received\n");
     return EXIT_FAILURE;
   }
-
-  if(validate_json(data)){
-    printf("[/!\\] Unparsable JSON received\n");
-    return EXIT_FAILURE;
-  }
-
   return EXIT_SUCCESS;
 }

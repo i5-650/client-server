@@ -312,30 +312,30 @@ int envoie_num_min(int socketfd){
     printf("[+] Enter a number : ");
     fgets(input, sizeof(char)*30, stdin);
     remove_last_newline(input);
-    add_element(data, input);
+    add_number_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
   strcat(data, "]}");
 
   if(write(socketfd, (void *)data, strlen(data)) < 0){
-    perror("[/!\\] Error sending message");
+    perror("[/!\\] Error sending message min");
     return EXIT_FAILURE;
   }
 
   memset(data, 0, sizeof(char)*DATA_LEN);
 
-  if(read(socketfd, data, sizeof(char)*DATA_LEN) < 0){
-    perror("[/!\\] Error receiving message");
+  if(read_validated(socketfd, data)){
     return EXIT_FAILURE;
   }
+
 
   if(strncmp(&data[strlen(FIRST_JSON_PART)], CODE_OKK, 3)){
     perror("[/!\\] An error occured on the server");
     return EXIT_FAILURE;
   }
 
-  printf("[+] Messages received %s\n",data);
+  printf("[+] Messages r  eceived min %s\n",data);
   
   return EXIT_SUCCESS;
 }
@@ -369,7 +369,7 @@ int envoie_num_max(int socketfd){
     printf("[+] Enter a number : ");
     fgets(input, sizeof(char)*30, stdin);
     remove_last_newline(input);
-    add_element(data, input);
+    add_number_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
@@ -425,7 +425,7 @@ int envoie_num_moy(int socketfd){
     printf("[+] Enter a number : ");
     fgets(input, sizeof(char)*30, stdin);
     remove_last_newline(input);
-    add_element(data, input);
+    add_number_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
@@ -481,7 +481,7 @@ int envoie_num_ect(int socketfd){
     printf("[+] Enter a number : ");
     fgets(input, sizeof(char)*30, stdin);
     remove_last_newline(input);
-    add_element(data, input);
+    add_number_element(data, input);
     memset(input, 0, sizeof(char)*30);
   }
 
@@ -570,29 +570,30 @@ int command_builder(int socketfd){
 
   printf("Veuiller choisir une fonction à exécuter (HELP pour plus d'informations !):");
   fgets(command, sizeof(char)*10, stdin);
+  
 
-  if (strcmp(command, "HELP\n") == 0){
-    printf("[*] Voici la liste de toutes les commandes: \n\t[*] MSG: Permet d'envoyer un message au serveur avec une réponse de sa part !\n\t[*] CALC : Permet d'envoyer un calcul au serveur avec le résultat en retour !\n\t[*] COLOR : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n\t[*] TAGS : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n\t[*] ANLZ : Permet d'analyser les couleurs d'une image et de les envoyer au serveur pour les sauvegarder.\n");
+  if (strcasecmp(command, "HELP\n") == 0){
+    printf("[*] Voici la liste de toutes les commandes: \n\t[*] Msg: Permet d'envoyer un message au serveur avec une réponse de sa part !\n\t[*] Calc : Permet d'envoyer un calcul au serveur avec le résultat en retour !\n\t[*] Color : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n\t[*] Tags : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n\t[*] Anlz : Permet d'analyser les couleurs d'une image et de les envoyer au serveur pour les sauvegarder.\n\t[*]Min : Permet de renvoyer le minimum d'une liste de nombres.\n\t[*]Max : Permet de renvoyer le maximum d'une liste de nombres.\n\t[*]Avg : Permet de renvoyer la moyenne d'une liste de nombres.\n\t[*]Ect: Permet de renvoyer l'ecart type d'une liste de nombres.\n");
     return 0;
   }
-  else if (strcmp(command, "MSG\n") == 0){
+  else if (strcasecmp(command, "MSG\n") == 0){
     printf("[+] Mode message activé : \n");
     envoie_recois_message(socketfd);
     return 0;
   }
-  else if (strcmp(command, "CALC\n") == 0){
+  else if (strcasecmp(command, "CALC\n") == 0){
     printf("[+] Mode calcul activé : \n");
     if(envoie_recois_calcul(socketfd)){
-      printf("TOUT CASSÉ\n");
+      printf("Calcul falied\n");
     }
     return 0;
   }
-  else if (strcmp(command, "COLOR\n") == 0){
+  else if (strcasecmp(command, "COLOR\n") == 0){
     printf("[+] Mode couleurs activé : ");
     envoie_couleurs_table(socketfd);
     return 0;
   }
-  else if(strcmp(command, "TAGS\n") == 0){
+  else if(strcasecmp(command, "TAGS\n") == 0){
     printf("[+] Mode balises activé: \n");
     if(envoie_balise(socketfd)){
       printf("[/!\\] Error occured during tags sending\n");
@@ -600,37 +601,48 @@ int command_builder(int socketfd){
     }
     return 0;
   }
-  else if(strcmp(command, "ANLZ\n") == 0){
+  else if(strcasecmp(command, "ANLZ\n") == 0){
     printf("[+] Mode analise activé : \n");
     if(envoie_couleurs(socketfd)){
       printf("[/!\\] Error occured during image handling\n");
     }
   }
-  else if(strcmp(command, "MIN\n") == 0){
+  else if(strcasecmp(command, "MIN\n") == 0){
     printf("[+] Mode minimum activé : \n");
     if(envoie_num_min(socketfd)){
-      printf("[/!\\] Error occured during minimum sending\n");
+      printf("[/!\\] Error occured during sending\n");
     }
   }
-  else if(strcmp(command, "MAX\n") == 0){
+  else if(strcasecmp(command, "MAX\n") == 0){
     printf("[+] Mode minimum activé : \n");
     if(envoie_num_max(socketfd)){
       printf("[/!\\] Error occured during minimum sending\n");
     }
   }
-  else if(strcmp(command,"AVG\n") == 0){
+  else if(strcasecmp(command,"AVG\n") == 0){
     printf("[+] Mode moyenne activé : \n");
     if(envoie_num_moy(socketfd)){
       printf("[/!\\] Error occured during minimum sending\n");
     }
   }
-  else if(strcmp(command, "ECT\n") == 0){
+  else if(strcasecmp(command, "ECT\n") == 0){
     printf("[+] Mode écart type activé : \n");
     if(envoie_num_ect(socketfd)){
       printf("[/!\\] Error occured during minimum sending\n");
     }
   }
-
+  else if (strcasecmp(command, "EXIT\n") == 0){
+    if(write(socketfd, END_CONN, strlen(END_CONN)) < 0){
+      perror("write");
+      exit(EXIT_FAILURE);
+    }
+    close(socketfd);
+    exit(EXIT_SUCCESS);
+  }
+  else{
+    printf("[/!\\] Commande inconnue\n");
+    return 0;
+  }
   return 1;
 }
 
@@ -644,11 +656,5 @@ int read_validated(int socketfd, char *data){
     printf("[/!\\] Invalid JSON received\n");
     return EXIT_FAILURE;
   }
-
-  if(validate_json(data)){
-    printf("[/!\\] Unparsable JSON received\n");
-    return EXIT_FAILURE;
-  }
-
   return EXIT_SUCCESS;
 }
