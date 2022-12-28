@@ -6,7 +6,8 @@ SERVER_OBJS ?= serveur.o operations.o json.o validation.o
 TESTES_OBJS ?= client.o bmp.o couleur.o json.o validation.o operations.o serveur.o testes.o
 
 # Avertissements
-CFLAGS ?= -Wall -Wextra -pthread -lm -g 
+CFLAGS ?= -Wall -Wextra -pthread -g -lm
+RElEASE_FLAGS ?= -Wall -Wextra -pthread -Ofast -ffast-math -finline-functions -lm
 
 # Déboggage
 DEBUG ?= -ggdb3
@@ -16,6 +17,8 @@ DEBUG ?= -ggdb3
 SERVER = serveur
 CLIENT = client
 TESTES = testes
+RLS_SERVER = serveur_release
+RLS_CLIENT = client_release
 
 all: $(SERVER) $(CLIENT)
 
@@ -26,6 +29,16 @@ $(SERVER): $(SERVER_OBJS)
 # Création d'un exécutable pour le côté client
 $(CLIENT): $(CLIENT_OBJS)
 	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS)
+
+
+release: $(RLS_SERVER) $(RLS_CLIENT)
+
+$(RLS_SERVER): $(SERVER_OBJS)
+	$(CC) $(RElEASE_FLAGS) -o $(RLS_SERVER).out $(SERVER_OBJS)
+
+$(RLS_CLIENT): $(CLIENT_OBJS)
+	$(CC) $(RElEASE_FLAGS) -o $(RLS_CLIENT).out $(CLIENT_OBJS)
+
 
 $(TESTES):
 	$(CC) -DTESTS="true" *.c $(CFLAGS) -o $(TESTES).out 
