@@ -6,6 +6,7 @@
 #include "operations.h"
 #include "testes.h"
 #include "validation.h"
+#include "client.h"
 
 /*
  * SPDX-FileCopyrightText: 2022 John Samuel
@@ -26,6 +27,8 @@ int main(){
     ASSERT_EQ_INT(1, json_validator(data));
     ASSERT_EQ_INT(1, json_validator(INVALID_JSON_MSG));
     ASSERT_EQ_INT(0, json_validator(invalid_json));
+    char temp_data[1024];
+    ASSERT_EQ_INT(EXIT_FAILURE, envoie_recois_name(temp_data));
     return 0;
 }
 

@@ -42,13 +42,13 @@ struct Client {
 };
 
 int recois_envoie_message(struct Client* cli);
-int recois_balises(int socketfd, char* data);
+int recois_balises(char* data);
 int save_in_file(char* tags, const char* file_to_save);
 void plot(char *data);
-int renvoie_message(int client_socket_fd, char *data);
-int recois_couleurs(int client_socket_fd, char *data);
+int renvoie_message(char *data);
+int recois_couleurs(char *data);
 void* manage_client(void* client);
-int read_validated(char *data);
+int check_validity(char *data);
 
 #define MAX_CLIENTS 9
 #define EXIT_END -1337

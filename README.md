@@ -1,5 +1,5 @@
 # client-server
-Client-server project for school
+Client-server project for school. We recommand you to read the full README.md file before running or compiling the code.
 
 ## What's possible now ? 
 - Send a message to the server and receive it back
@@ -100,3 +100,13 @@ If the message is a single text information, the `value` array will only contain
 ## Mac and Linux difference
 If you are willing to run this code on MacOs, it will work fine. We encountered a problem using semaphores on Mac. Indeed, Mac doesn't support a non-deprecated version of posix semaphores. So we had to use an other version of it, specific to mac.
 Do not worry, if you run this code on Linux it will use the posix semaphores.
+
+## Compilation goals
+There is 3 compilation goals:
+- `make all`, `make`, `make -j`... That will compile the server and the client with debug options. If you just want to try the code, use this one.
+- `make testes`: This goal will compile __every__ `.c` files and remove the main function from `client.c` and `serveur.c` to make the code testable. It will also compile the tests files. If you want to unitary test the code, use this one.
+- `make release`: This goal will compile the server and the client without debug options. If you want to run the code on a server, use this one. There is no tests in this goal and flags to make the code faster.
+
+## Running and usefull goals
+- `make tests` will run the tests. If you want to run the tests, use this one.
+- `make clean` will remove all the `.o`, `.out` and `.txt` files in the project.
