@@ -26,14 +26,14 @@
  * Il faut un argument : l'identifiant de la socket
  */
 void manage_signal(int sig);
-int envoie_recois_message(int socketfd);
-int envoie_balise(int socketfd);
-int command_builder(int socketfd);
-int envoie_recois_calcul(int socketfd);
-int envoie_recois_name(int socketfd);
+int envoie_recois_message(char* data);
+int envoie_balise(char* data);
+int command_builder(int socketfd, char* data);
+int envoie_recois_calcul(char* data);
+int envoie_recois_name(char* data);
 void analyse(char *pathname, char *data);
-int envoie_couleurs(int socketfd);
-int envoie_couleurs_table(int socketfd);
+int envoie_couleurs(char* data);
+int envoie_couleurs_table(char* data);
 int read_validated(int socketfd, char *data);
 
 #endif
