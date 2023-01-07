@@ -24,7 +24,11 @@ int get_calcul(char* data, struct Calc *to_calc){
     unsigned int start_index = strlen(FIRST_JSON_PART) + 3 + strlen(ARRAY_JSON_PART) + 1;
     to_calc->operation = data[start_index];
     start_index+=3;
-    if(sscanf(&data[start_index], "%f,%f", &to_calc->nums[0], &to_calc->nums[1]) < 0){
+    if(sscanf(&data[start_index], "%f,%f", &to_calc->nums[0], &to_calc->nums[1]) < 2 
+    || (to_calc->operation != '+' 
+        && to_calc->operation != '-' 
+        && to_calc->operation != '*' 
+        && to_calc->operation != '/')){
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

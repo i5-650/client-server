@@ -211,27 +211,27 @@ int recois_envoie_message(struct Client* cli){
     }
   }
   else if(!strncmp(code, CODE_CAL, 3)){
-    if(calcul(cli->socketfd, data)){
+    if(calcul( data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(!strncmp(code, CODE_MIN, 3)){
-    if(mini(cli->socketfd,data)){
+    if(mini(data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if(!strncmp(code, CODE_MAX, 3)){
-    if(maxi(cli->socketfd,data)){
+    if(maxi(data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if (!strncmp(code, CODE_AVG, 3)){
-    if(avg(cli->socketfd, data)){
+    if(avg(data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }
   else if (!strncmp(code, CODE_ECT, 3)){
-    if(ecart(cli->socketfd, data)){
+    if(ecart(data)){
       printf("[/!\\] An error occured while sending a messages\n");
     }
   }

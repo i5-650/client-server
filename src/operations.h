@@ -19,10 +19,10 @@ struct Calc {
 };
 
 int calculator(struct Calc *c, float* output);
-int calcul(int client_socket_fd, char *data);
-int mini(int client_socket_fd, char *data);
-int maxi(int client_socket_fd, char *data);
-int avg(int client_socket_fd, char *data);
-int ecart(int client_socket_fd, char *data);
+int calcul(char *data);
+int mini(char *data);
+int maxi(char *data);
+int avg(char *data);
+int ecart(char *data);
 
 #endif

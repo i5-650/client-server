@@ -6,7 +6,7 @@ SERVER_OBJS ?= serveur.o operations.o json.o validation.o
 TESTES_OBJS ?= client.o bmp.o couleur.o json.o validation.o operations.o serveur.o testes.o
 
 # Avertissements
-CFLAGS ?= -Wall -Wextra -pthread -g -lm
+CFLAGS ?= -Wall -Wextra -pthread -g
 RElEASE_FLAGS ?= -Wall -Wextra -pthread -Ofast -ffast-math -finline-functions -lm
 
 # Déboggage
@@ -24,11 +24,11 @@ all: $(SERVER) $(CLIENT)
 
 # Création d'un exécutable pour le côté serveur
 $(SERVER): $(SERVER_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(SERVER).out $(SERVER_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -lm -o $(SERVER).out $(SERVER_OBJS)
 
 # Création d'un exécutable pour le côté client
 $(CLIENT): $(CLIENT_OBJS)
-	$(CC) $(DEBUG) $(CFLAGS) -o $(CLIENT).out $(CLIENT_OBJS)
+	$(CC) $(DEBUG) $(CFLAGS) -lm -o $(CLIENT).out $(CLIENT_OBJS)
 
 
 release: $(RLS_SERVER) $(RLS_CLIENT)
@@ -41,7 +41,7 @@ $(RLS_CLIENT): $(CLIENT_OBJS)
 
 
 $(TESTES):
-	$(CC) -DTESTS="true" *.c $(CFLAGS) -o $(TESTES).out 
+	$(CC) -DTESTS="true" *.c $(CFLAGS) $(DEBUG) -o $(TESTES).out 
 
 # Compilation du code sans création d'un exécutable
 .c.o: 

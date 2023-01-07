@@ -381,7 +381,7 @@ int command_builder(int socketfd, char* data){
   
 
   if (strcasecmp(command, "HELP\n") == 0){
-    printf("[*] Voici la liste de toutes les commandes: \n\t[*] Msg: Permet d'envoyer un message au serveur avec une réponse de sa part !\n\t[*] Calc : Permet d'envoyer un calcul au serveur avec le résultat en retour !\n\t[*] Color : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n\t[*] Tags : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n\t[*] Anlz : Permet d'analyser les couleurs d'une image et de les envoyer au serveur pour les sauvegarder.\n\t[*]Min : Permet de renvoyer le minimum d'une liste de nombres.\n\t[*]Max : Permet de renvoyer le maximum d'une liste de nombres.\n\t[*]Avg : Permet de renvoyer la moyenne d'une liste de nombres.\n\t[*]Ect: Permet de renvoyer l'ecart type d'une liste de nombres.\n");
+    printf("[*] Voici la liste de toutes les commandes: \n\t[*] Msg: Permet d'envoyer un message au serveur avec une réponse de sa part !\n\t[*] Calc : Permet d'envoyer un calcul au serveur avec le résultat en retour !\n\t[*] Color : Permet d'envoyer des couleurs au serveur et de les sauvegarder dans un fichier !\n\t[*] Tags : Permet d'envoyer dse balises au serveurs et les sauvegarder !\n\t[*] Anlz : Permet d'analyser les couleurs d'une image et de les envoyer au serveur pour les sauvegarder.\n\t[*] Min : Permet de renvoyer le minimum d'une liste de nombres.\n\t[*] Max : Permet de renvoyer le maximum d'une liste de nombres.\n\t[*] Avg : Permet de renvoyer la moyenne d'une liste de nombres.\n\t[*] Ect: Permet de renvoyer l'ecart type d'une liste de nombres.\n\t[*] Exit : Permet de quitter le programme.\n");
     return EXIT_SUCCESS;
   }
   else if (strcasecmp(command, "MSG\n") == 0){

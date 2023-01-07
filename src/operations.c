@@ -38,7 +38,7 @@ int calculator(struct Calc *c, float* output){
   return EXIT_SUCCESS;
 }
 
-int calcul(int client_socket_fd, char *data){
+int calcul(char *data){
   float result = 0.0;
   struct Calc c;
   c.operation = '%';
@@ -46,6 +46,7 @@ int calcul(int client_socket_fd, char *data){
   c.nums[1] = 0.0;
   if(get_calcul(data, &c)){
     create_error_message(data, "parsing input");
+    return EXIT_FAILURE;
   }
 
   int status = calculator(&c, &result);
@@ -62,29 +63,23 @@ int calcul(int client_socket_fd, char *data){
       create_error_message(data, "Impossible operation");
       break;
     default:
-    printf("result %f\n", result);
       if(sprintf(tmp, "%f", result) < 0){
         create_error_message(data, "Internal server error");
       }
       else {
-        create_ok_message(data, tmp);
+        create_ok_message_int(data, tmp);
       }
   }
-
-  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-    perror("error sending datas");
-    return EXIT_FAILURE;
-  } 
 
   return EXIT_SUCCESS;
 }
 
-int mini(int client_socket_fd, char *data){
-  int n;
+int mini(char *data){
+  int n=0;
   int count=0;
   int size_tab=0;
   int tab_int[1024];
-  int smallest_val;
+  int* smallest_val = NULL;
 
   char str[1024] = "";
   memcpy(str, data, 1024);
@@ -109,11 +104,11 @@ int mini(int client_socket_fd, char *data){
     }
 
 
-    smallest_val = tab_int[0];
+    smallest_val = tab_int;
 
     for(int i=0;i<size_tab;i++){
-      if(tab_int[i]<smallest_val){
-        smallest_val=tab_int[i];
+      if(tab_int[i]<*smallest_val){
+        smallest_val = &tab_int[i];
       }
     }
 
@@ -124,26 +119,22 @@ int mini(int client_socket_fd, char *data){
   memset(data, 0, sizeof(char)*1024);
 
   char int_to_str[10];
-  if(sprintf(int_to_str, "%d", smallest_val) < 0){
+  if(smallest_val == NULL || sprintf(int_to_str, "%d", *smallest_val) < 0){
     create_error_message(data, "couldn't parse min value");
   }
   else {
     create_ok_message_int(data, int_to_str);
   }
 
-  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-    printf("[/!\\] An error occured while sending a message");
-    return EXIT_FAILURE;
-  }
   return EXIT_SUCCESS;
 }
 
-int maxi(int client_socket_fd, char *data){
+int maxi(char *data){
   int n;
   int count=0;
   int size_tab=0;
-  int tab_int[1024];
-  int biggest_val;
+  int tab_int[30] = {0};
+  int* biggest_val = NULL;
 
   char *str = data;
 
@@ -167,11 +158,11 @@ int maxi(int client_socket_fd, char *data){
     }
 
 
-    biggest_val = tab_int[0];
+    biggest_val = tab_int;
 
     for(int i=0;i<size_tab;i++){
-      if(tab_int[i]>biggest_val){
-        biggest_val=tab_int[i];
+      if(tab_int[i]>*biggest_val){
+        biggest_val=&tab_int[i];
       }
     }
 
@@ -180,22 +171,18 @@ int maxi(int client_socket_fd, char *data){
   }
 
   memset(data, 0, sizeof(char)*1024);
-  char int_to_str[10];
-  if(sprintf(int_to_str, "%d", biggest_val) < 0){
+  char int_to_str[10] = "fail";
+  if(biggest_val == NULL || sprintf(int_to_str, "%d", *biggest_val) < 0){
     create_error_message(data, "couldn't parse max value");
   }
   else {
-    create_ok_message(data, int_to_str);
+    create_ok_message_int(data, int_to_str);
   }
 
-  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-    printf("[/!\\] An error occured while sending a message");
-    return EXIT_FAILURE;
-  }
   return EXIT_SUCCESS;
 }
 
-int avg(int client_socket_fd, char* data){
+int avg(char* data){
   int n;
   float number=0.0;
   int count=0;
@@ -231,9 +218,6 @@ int avg(int client_socket_fd, char* data){
 
   if(number==0){
     create_error_message(data, "couldn't parse avg value");
-    if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-      printf("[/!\\] An error occured while sending a message");
-    }
     return EXIT_FAILURE;
   }
 
@@ -243,16 +227,12 @@ int avg(int client_socket_fd, char* data){
     create_error_message(data, "couldn't parse avg value");
   }
   else {
-    create_ok_message(data, temp);
-  }
-
-  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-    printf("[/!\\] An error occured while sending a message");
+    create_ok_message_int(data, temp);
   }
   return EXIT_SUCCESS;
 }
 
-int ecart(int client_socket_fd,char* data){
+int ecart(char* data){
   float sum = 0.0;
   float avg = 0.0;
 
@@ -302,15 +282,11 @@ int ecart(int client_socket_fd,char* data){
 
   res = sqrt(sum / num_of_int);
 
-  if(sprintf(temp, "%f", res) < 1){
-    create_error_message(data, "couldn't parse avg value");
+  if(sprintf(temp, "%f", res) < 1 || strcasecmp(temp, "nan") == 0){
+    create_error_message(data, "couldn't parse ect value");
   }
   else {
-    create_ok_message(data, temp);
-  }
-
-  if(write(client_socket_fd, (void *)data, strlen(data)) < 0){
-    printf("[/!\\] An error occured while sending a message");
+    create_ok_message_int(data, temp);
   }
   return EXIT_SUCCESS;
 }
